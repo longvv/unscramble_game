@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Scramble Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Word Scramble Game</h1>
+        
+        <!-- Celebration overlay -->
+        <div id="celebration-overlay" class="celebration-overlay">
+            <div class="congrats-message">
+                <h2>Great Job!</h2>
+                <p>You solved the word!</p>
+            </div>
+            <div class="fireworks-container">
+                <div class="firework" id="firework1"></div>
+                <div class="firework" id="firework2"></div>
+                <div class="firework" id="firework3"></div>
+            </div>
+            <div class="balloon balloon-left"></div>
+            <div class="balloon balloon-right"></div>
+            <!-- Confetti pieces -->
+            <div class="confetti" style="left:10%; background-color:#ff4081;"></div>
+            <div class="confetti" style="left:20%; background-color:#4caf50; animation-delay:0.7s;"></div>
+            <div class="confetti" style="left:30%; background-color:#ffeb3b; animation-delay:1.1s;"></div>
+            <div class="confetti" style="left:40%; background-color:#2196f3; animation-delay:0.4s;"></div>
+            <div class="confetti" style="left:50%; background-color:#9c27b0; animation-delay:0.9s;"></div>
+            <div class="confetti" style="left:60%; background-color:#f44336; animation-delay:0.2s;"></div>
+            <div class="confetti" style="left:70%; background-color:#ff9800; animation-delay:0.5s;"></div>
+            <div class="confetti" style="left:80%; background-color:#00bcd4; animation-delay:1.3s;"></div>
+            <div class="confetti" style="left:90%; background-color:#8bc34a; animation-delay:0.8s;"></div>
+        </div>
+        
+        <div class="game-area">
+            <div class="score-container">
+                <p>Score: <span id="score">0</span></p>
+            </div>
+            
+            <!-- Celebration element for animation -->
+            <div id="celebration-element" class="celebration-element">
+                <div class="celebration-content">
+                    <h2>Excellent!</h2>
+                    <div class="star-container">
+                        <div class="star"></div>
+                        <div class="star"></div>
+                        <div class="star"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="word-container">
+                <p class="instruction">Unscramble this word:</p>
+                <div id="scrambled-word" class="scrambled-word"></div>
+            </div>
+            
+            <div id="drop-area" class="drop-area">
+                <p>Drop letters here to form the word</p>
+            </div>
+            
+            <div class="image-container">
+                <img id="word-image" src="" alt="Word Image">
+            </div>
+            
+            <div class="buttons-container">
+                <button id="hint-btn" class="game-btn">Hint</button>
+                <button id="pronounce-btn" class="game-btn">Pronounce</button>
+                <button id="check-btn" class="game-btn primary">Check</button>
+                <button id="next-btn" class="game-btn">Next Word</button>
+            </div>
+        </div>
+        
+        <div class="management-area">
+            <h2>Word Management</h2>
+            
+            <div class="add-word-container">
+                <input type="text" id="new-word-input" placeholder="Enter a new word">
+                
+                <div id="image-upload-area" class="image-upload-area">
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                    <div id="image-preview" class="image-preview"></div>
+                    <div class="upload-instruction">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop image here or click to upload</p>
+                    </div>
+                </div>
+                
+                <button id="add-word-btn" class="game-btn primary">Add Word</button>
+            </div>
+            
+            <div class="word-list-container">
+                <h3>Your Words:</h3>
+                <div id="word-items" class="word-items"></div>
+                <button id="save-words-btn" class="game-btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio elements -->
+    <audio id="correct-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-fairy-arcade-sparkle-866.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" preload="auto"></audio>
+    <audio id="drag-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3" preload="auto"></audio>
+    <audio id="hint-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3" preload="auto"></audio>
+    <audio id="pronunciation" src="" preload="auto"></audio>
+    <audio id="clapping-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3" preload="auto"></audio>
+    <audio id="whistle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3" preload="auto"></audio>
+    
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ui-factory.js"></script>
+    <script src="js/word-manager.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/game-controller.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
