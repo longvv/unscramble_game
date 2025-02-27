@@ -3,8 +3,18 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/style.css',
+    '/manifest.json',
+    '/icon-192x192.png',
+    '/icon-512x512.png',
     '/js/main.js',
-    // Thêm các file JS khác
+    '/js/config.js',
+    '/js/audio.js',
+    '/js/drag-drop.js',
+    '/js/game-controller.js',
+    '/js/storage.js',
+    '/js/touch-drag.js',
+    '/js/ui-factory.js',
+    '/js/word-manager.js'
 ];
 
 self.addEventListener('install', (event) => {
