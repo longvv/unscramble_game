@@ -320,7 +320,7 @@ const GameController = (function() {
             // Initialize drag and drop manager
             window.DragDropManager.init(this)
                 .setupDropAreaListeners(_elements.dropArea, _checkAnswer)
-                .setupScrambledWordListeners(_elements.scrambledWord, _checkAnswer);
+                .setupScrambledAreaListeners(_elements.scrambledWord);
             
             // Initialize word manager
             window.WordManager.init({
@@ -329,7 +329,7 @@ const GameController = (function() {
                 imageUploadArea: window.document.getElementById('image-upload-area'),
                 imageUpload: window.document.getElementById('image-upload'),
                 imagePreview: window.document.getElementById('image-preview'),
-                wordList: window.document.getElementById('word-list')
+                wordList: window.document.getElementById('word-items')
             });
             
             // Load saved score
