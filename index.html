@@ -110,6 +110,14 @@
     <audio id="whistle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3" preload="auto"></audio>
     
     <!-- Scripts -->
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/js/service-worker.js');
+            });
+        }
+    </script>
     <script src="js/config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/audio.js"></script>

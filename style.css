@@ -231,6 +231,11 @@ h2 {
     color: #2d3436;
 }
 
+button, .letter-tile {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
 .buttons {
     display: flex;
     justify-content: center;
@@ -948,25 +953,64 @@ button:hover {
 @media (max-width: 600px) {
     .container {
         padding: 10px;
-    }
-
-    h1 {
-        font-size: 1.8rem;
+        width: 100%;
     }
 
     .game-area, .management-area {
-        padding: 15px;
+        padding: 10px;
     }
 
-    .letter-tile {
+    /* Điều chỉnh kích thước tile và box */
+    .letter-tile, .letter-box {
         width: 40px;
         height: 40px;
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
 
-    .letter-box {
-        width: 40px;
-        height: 40px;
+    /* Nút bấm responsive */
+    .buttons-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .game-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Form nhập từ */
+    .add-word-container {
+        flex-direction: column;
+    }
+
+    #new-word-input, #add-word-btn {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* Hình ảnh từ */
+    .word-image-container {
+        margin: 10px 0;
+    }
+
+    .word-image {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+}
+
+/* Hỗ trợ các thiết bị có chiều rộng <= 375px */
+@media (max-width: 375px) {
+    .letter-tile, .letter-box {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
     }
 }
 
