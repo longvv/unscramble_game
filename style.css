@@ -1032,6 +1032,16 @@ button:hover {
     }
 }
 
+@media (max-width: 576px) {
+    .position-number {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        top: -6px;
+        right: -6px;
+    }
+}
+
 /* Extra small devices (phones, 375px and down) */
 @media (max-width: 375px) {
     .letter-box:empty {
@@ -1086,7 +1096,7 @@ button:hover {
         min-width: 40px;
         min-height: 40px;
     }
-    
+
     .letter-tile, .letter-box {
         width: 40px;
         height: 40px;
@@ -1124,19 +1134,6 @@ button:hover {
         width: 100%;
         max-width: 300px;
         height: auto;
-    }
-}
-
-/* Hỗ trợ các thiết bị có chiều rộng <= 375px */
-@media (max-width: 375px) {
-    .letter-tile, .letter-box {
-        width: 40px;
-        height: 40px;
-        font-size: 0.9rem;
-    }
-
-    h1 {
-        font-size: 1.5rem;
     }
 }
 
@@ -1249,4 +1246,27 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+/* Styles for letter box position numbers */
+.position-number {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: #5f27cd;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 5; /* Ensure it's above other elements */
+}
+
+.letter-box {
+    position: relative;
 }

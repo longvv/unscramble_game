@@ -42,6 +42,12 @@ const UIFactory = (function() {
             letterBox.className = 'letter-box';
             letterBox.setAttribute('data-position', position);
             
+            // Add number indicator
+            const numberIndicator = document.createElement('div');
+            numberIndicator.className = 'position-number';
+            numberIndicator.textContent = position + 1; // Add 1 because position is zero-based
+            letterBox.appendChild(numberIndicator);
+            
             // Set up drop event listeners if callbacks provided
             if (dropCallbacks) {
                 if (dropCallbacks.dragOver) {
