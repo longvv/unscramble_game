@@ -48,6 +48,17 @@ const DragDropManager = (function() {
             
             // Play drag sound
             window.AudioService.playSound('drag');
+
+            // Add touch support
+            if (e.type === 'touchstart') {
+                e.preventDefault(); // Prevent default touch behavior
+                const touch = e.touches[0];
+                e.target.classList.add('dragging');
+                
+                // Track touch position
+                this._touchStartX = touch.clientX;
+                this._touchStartY = touch.clientY;
+            }
         },
         
         /**
@@ -309,6 +320,13 @@ const DragDropManager = (function() {
                 dragLeave: this.dragLeave,
                 drop: (e) => this.dropOnLetterBox(e, checkAnswerCallback)
             };
+        },
+
+        // Add touch event listeners
+        setupTouchEvents: function(element) {
+            element.addEventListener('touchstart', this.dragStart);
+            element.addEventListener('touchmove', this.touchMove);
+            element.addEventListener('touchend', this.touchEnd);
         }
     };
 })();

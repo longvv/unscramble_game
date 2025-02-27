@@ -191,7 +191,7 @@ function handleImageFile(file, previewElement) {
         
         // Show the preview
         previewElement.style.display = 'block';
-        previewElement.innerHTML = `<img src="${tempImageData}" alt="Preview">`;
+        previewElement.innerHTML = `<img src="${tempImageData}" alt="Preview"  loading="lazy">`;
         
         // Hide the upload area once we have an image
         const uploadArea = document.getElementById('image-upload-area');
@@ -232,7 +232,7 @@ function addWordToList(wordInput, imagePreview, wordItemsContainer) {
     // Word image thumbnail (if available)
     const hasImage = tempImageData !== null;
     const imageHtml = hasImage ? 
-        `<div class="word-image"><img src="${tempImageData}" alt="${word}"></div>` : 
+        `<div class="word-image"><img src="${tempImageData}" alt="${word}"  loading="lazy"></div>` : 
         '';
     
     // Add the content
@@ -328,7 +328,7 @@ function populateWordList(wordItemsContainer) {
         // Check if the word has an associated image
         const hasImage = defaultWordImages[word] !== undefined;
         const imageHtml = hasImage ? 
-            `<div class="word-image"><img src="${defaultWordImages[word]}" alt="${word}"></div>` : 
+            `<div class="word-image"><img src="${defaultWordImages[word]}" alt="${word}"  loading="lazy"></div>` : 
             '';
         
         // Add the content
@@ -633,7 +633,7 @@ function createLetterTile(letter) {
 // Display the image for the current word
 function displayWordImage() {
     if (currentImageUrl) {
-        wordImageElement.innerHTML = `<img src="${currentImageUrl}" alt="${currentWord}" />`;
+        wordImageElement.innerHTML = `<img src="${currentImageUrl}" alt="${currentWord}"  loading="lazy"/>`;
     } else {
         // If no image is available, just show the word
         wordImageElement.innerHTML = `<p>${currentWord}</p>`;

@@ -63,7 +63,7 @@
             </div>
             
             <div class="image-container">
-                <img id="word-image" src="" alt="Word Image">
+                <img id="word-image" src="" alt="Word Image" loading="lazy">
             </div>
             
             <div class="buttons-container">
@@ -114,7 +114,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/js/service-worker.js');
+                navigator.serviceWorker.register('/service-worker.js');
             });
         }
     </script>
