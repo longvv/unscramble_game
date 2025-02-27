@@ -42,7 +42,7 @@ const UIFactory = (function() {
             letterBox.className = 'letter-box';
             letterBox.setAttribute('data-position', position);
             
-            // Add number indicator
+            // Add number indicator (centered in the box)
             const numberIndicator = document.createElement('div');
             numberIndicator.className = 'position-number';
             numberIndicator.textContent = position + 1; // Add 1 because position is zero-based
