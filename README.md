@@ -54,3 +54,104 @@ Simply open the `index.html` file in any modern web browser.
 - Creates associations between words, images, and sounds
 
 Enjoy learning through play!
+
+## 📦 Project Structure
+
+```
+word-scramble-game/
+├── docs-site/           # Docusaurus documentation
+│   ├── docs/            # Markdown documentation files
+│   ├── src/             # React components and custom pages
+│   ├── static/          # Static assets
+│   └── docusaurus.config.js
+│
+├── js/                  # Game JavaScript modules
+│   ├── config.js        # Game configuration
+│   ├── storage.js       # Data persistence
+│   ├── audio.js         # Sound management
+│   ├── ui-factory.js    # UI component creation
+│   ├── word-manager.js  # Word list management
+│   ├── drag-drop.js     # Drag and drop functionality
+│   ├── game-controller.js # Main game logic
+│   └── main.js          # Entry point
+│
+├── index.html           # Main game HTML
+├── style.css            # Game styling
+└── README.md            # Project documentation
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- npm or Yarn
+- Git
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/longvv/unscramble_game.git
+   cd unscramble_game
+   ```
+
+2. Install dependencies:
+   ```bash
+   # Navigate to the docs-site directory
+   cd docs-site
+   
+   # Install dependencies
+   npm install
+   # or
+   yarn install
+   ```
+
+### Development Workflow
+
+#### Running the Documentation Site
+
+```bash
+# In the docs-site directory
+npm start
+# or
+yarn start
+```
+
+This starts the Docusaurus development server, typically at `http://localhost:3000`.
+
+#### Running the Game
+
+Open `index.html` directly in a web browser.
+
+### Building Documentation
+
+```bash
+# In the docs-site directory
+npm run build
+# or
+yarn build
+```
+
+### Deployment
+
+The project supports deployment to various platforms:
+
+#### GitHub Pages
+
+```bash
+# In the docs-site directory
+npm run deploy
+# or
+yarn deploy
+```
+
+## 📖 Documentation
+
+Comprehensive documentation is available in the `docs-site/docs/` directory:
+
+- [User Guide](/docs/user-guide)
+- [Developer Guide](/docs/developer-guide)
+- [Module Documentation](/docs/modules)
+- [Architecture Overview](/docs/architecture)
+
