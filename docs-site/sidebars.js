@@ -21,6 +21,7 @@ const sidebars = {
         'modules/word-manager',
         'modules/drag-drop',
         'modules/game-controller',
+        'modules/main',
       ],
     },
     'user-guide',
