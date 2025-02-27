@@ -1,13 +1,22 @@
 {
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
-    "shortcuts": [
+    "name": "Word Scramble Game",
+    "short_name": "WordScramble",
+    "description": "Educational word game for children",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#f0f8ff",
+    "theme_color": "#ff6b6b",
+    "orientation": "portrait",
+    "icons": [
         {
-            "name": "Play Game",
-            "short_name": "Play",
-            "description": "Start a new word scramble game",
-            "url": "/index.html",
-            "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
+            "src": "icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512x512.png", 
+            "sizes": "512x512",
+            "type": "image/png"
         }
     ]
 }

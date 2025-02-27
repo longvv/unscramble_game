@@ -108,7 +108,7 @@ h2 {
 }
 
 .letter-box {
-    width: 60px;
+    /* width: 60px;
     height: 60px;
     background-color: #ffffff;
     border: 2px dashed #a29bfe;
@@ -118,7 +118,16 @@ h2 {
     align-items: center;
     margin: 6px;
     transition: all 0.3s;
-    position: relative;
+    position: relative; */
+    width: 50px;
+    height: 50px;
+    background-color: #ffffff;
+    border: 2px dashed #a29bfe;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* prevent shrinking */
 }
 
 .letter-box.drag-over {
@@ -143,7 +152,7 @@ h2 {
 }
 
 .drop-area {
-    border: 2px dashed #a29bfe;
+    /* border: 2px dashed #a29bfe;
     border-radius: 10px;
     min-height: 100px;
     padding: 20px 15px;
@@ -154,7 +163,12 @@ h2 {
     background-color: #f0f0f8;
     transition: all 0.2s;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 10px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px; /* consistent spacing */
 }
 
 .drop-area p {
@@ -1012,8 +1026,8 @@ button:hover {
 /* Hỗ trợ các thiết bị có chiều rộng <= 375px */
 @media (max-width: 375px) {
     .letter-tile, .letter-box {
-        width: 35px;
-        height: 35px;
+        width: 40px;
+        height: 40px;
         font-size: 0.9rem;
     }
 
@@ -1113,4 +1127,22 @@ button:hover {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-5px); }
     40%, 80% { transform: translateX(5px); }
+}
+
+/* Improve touch target sizes */
+.letter-tile, .letter-box, button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+/* Prevent text selection */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
