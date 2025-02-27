@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Word Scramble Game</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -110,7 +111,6 @@
     <audio id="whistle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3" preload="auto"></audio>
     
     <!-- Scripts -->
-    <link rel="manifest" href="manifest.json">
     <script>
         if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
             window.addEventListener('load', () => {
@@ -131,6 +131,7 @@
     <script src="js/word-manager.js"></script>
     <script src="js/drag-drop.js"></script>
     <script src="js/game-controller.js"></script>
+    <script src="js/touch-drag.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

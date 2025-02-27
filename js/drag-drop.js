@@ -6,93 +6,6 @@ const DragDropManager = (function() {
     // Private state
     let _draggedItem = null;
     let _gameController = null;
-
-    // Add touch event support
-    function _setupTouchEvents(element) {
-        let touchStartX, touchStartY, draggedElement;
-
-        element.addEventListener('touchstart', function(e) {
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-            
-            // Find the tile element
-            draggedElement = e.target.closest('.letter-tile');
-            
-            if (draggedElement) {
-                draggedElement.classList.add('dragging');
-                
-                // Prevent default to stop scrolling
-                e.preventDefault();
-            }
-        });
-
-        element.addEventListener('touchmove', function(e) {
-            if (!draggedElement) return;
-            
-            const touch = e.touches[0];
-            const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
-            
-            // Find potential drop target
-            const dropTarget = elementUnderTouch?.closest('.letter-box, .scrambled-word');
-            
-            if (dropTarget) {
-                dropTarget.classList.add('drag-over');
-            }
-            
-            e.preventDefault();
-        });
-
-        element.addEventListener('touchend', function(e) {
-            if (!draggedElement) return;
-            
-            draggedElement.classList.remove('dragging');
-            
-            const touch = e.changedTouches[0];
-            const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
-            
-            // Find potential drop target
-            const dropTarget = elementUnderTouch?.closest('.letter-box, .scrambled-word');
-            
-            if (dropTarget) {
-                dropTarget.classList.remove('drag-over');
-                
-                if (dropTarget.classList.contains('letter-box') && !dropTarget.querySelector('.letter-tile')) {
-                    // Clone the tile for the drop
-                    const clonedTile = draggedElement.cloneNode(true);
-                    clonedTile.id = 'touch-drop-' + Date.now();
-                    
-                    // Add drag event listeners to clone
-                    clonedTile.addEventListener('dragstart', this.dragStart);
-                    clonedTile.addEventListener('dragend', this.dragEnd);
-                    
-                    // Add to drop target
-                    dropTarget.appendChild(clonedTile);
-                    
-                    // Remove original
-                    draggedElement.remove();
-                    
-                    // Play sound
-                    window.AudioService.playSound('drag');
-                }
-                else if (dropTarget.classList.contains('scrambled-word')) {
-                    // Return tile to scrambled word area
-                    const clonedTile = draggedElement.cloneNode(true);
-                    clonedTile.id = 'touch-scramble-' + Date.now();
-                    
-                    // Add drag event listeners to clone
-                    clonedTile.addEventListener('dragstart', this.dragStart);
-                    clonedTile.addEventListener('dragend', this.dragEnd);
-                    
-                    dropTarget.appendChild(clonedTile);
-                    draggedElement.remove();
-                }
-            }
-            
-            draggedElement = null;
-            e.preventDefault();
-        });
-    }
     
     // Public API
     return {
@@ -103,10 +16,6 @@ const DragDropManager = (function() {
          */
         init: function(gameController) {
             _gameController = gameController;
-            // Add touch event support to draggable elements
-            const draggableElements = document.querySelectorAll('.letter-tile');
-            draggableElements.forEach(_setupTouchEvents);
-
             return this;
         },
         
@@ -139,17 +48,6 @@ const DragDropManager = (function() {
             
             // Play drag sound
             window.AudioService.playSound('drag');
-
-            // Add touch support
-            if (e.type === 'touchstart') {
-                e.preventDefault(); // Prevent default touch behavior
-                const touch = e.touches[0];
-                e.target.classList.add('dragging');
-                
-                // Track touch position
-                this._touchStartX = touch.clientX;
-                this._touchStartY = touch.clientY;
-            }
         },
         
         /**
@@ -411,13 +309,6 @@ const DragDropManager = (function() {
                 dragLeave: this.dragLeave,
                 drop: (e) => this.dropOnLetterBox(e, checkAnswerCallback)
             };
-        },
-
-        // Add touch event listeners
-        setupTouchEvents: function(element) {
-            element.addEventListener('touchstart', this.dragStart);
-            element.addEventListener('touchmove', this.touchMove);
-            element.addEventListener('touchend', this.touchEnd);
         }
     };
 })();
