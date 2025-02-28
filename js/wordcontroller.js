@@ -1,9 +1,9 @@
 /**
- * WordController Module for Word Scramble Game
- * Handles word management, loading, and scrambling
+ * Improved WordController Module for Word Scramble Game
+ * Handles word management, loading, and scrambling with improved letter box creation
  */
 const WordController = (function() {
-    // Private state (minimized since GameState is now the source of truth)
+    // Private state
     let _elements = {
         dropArea: null,
         scrambledWordElement: null
@@ -36,25 +36,38 @@ const WordController = (function() {
     }
     
     /**
-     * Display the scrambled word in the UI
+     * Display the scrambled word in the UI with improved tile creation
      * @param {string} scrambledWord - The scrambled word to display
      */
     function _displayScrambledWord(scrambledWord) {
-        if (!_elements.scrambledWordElement) return;
+        if (!_elements.scrambledWordElement) {
+            console.error('Scrambled word element not found');
+            return;
+        }
         
         // Clear existing content
         _elements.scrambledWordElement.innerHTML = '';
+        
+        // Ensure DragDropManager is available
+        if (!window.DragDropManager) {
+            console.error('DragDropManager not found or not initialized');
+            return;
+        }
         
         // Create letter tiles for each character
         for (let i = 0; i < scrambledWord.length; i++) {
             const letter = scrambledWord[i];
             
             // Create a letter tile
-            const letterTile = window.UIFactory.createLetterTile(
-                letter,
-                window.DragDropManager.dragStart.bind(window.DragDropManager),
-                window.DragDropManager.dragEnd.bind(window.DragDropManager)
-            );
+            let letterTile = document.createElement('div');
+            letterTile.className = 'letter-tile';
+            letterTile.textContent = letter;
+            letterTile.draggable = true;
+            letterTile.id = `tile-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 5)}`;
+            
+            // Add drag event listeners
+            letterTile.addEventListener('dragstart', window.DragDropManager.dragStart);
+            letterTile.addEventListener('dragend', window.DragDropManager.dragEnd);
             
             // Add to scrambled word area
             _elements.scrambledWordElement.appendChild(letterTile);
@@ -62,23 +75,49 @@ const WordController = (function() {
     }
     
     /**
-     * Create letter boxes in the drop area
+     * Create letter boxes in the drop area with improved positioning
      * @param {string} word - The current word
      */
     function _createLetterBoxes(word) {
-        if (!_elements.dropArea) return;
+        if (!_elements.dropArea) {
+            console.error('Drop area element not found');
+            return;
+        }
         
         // Clear existing content
         _elements.dropArea.innerHTML = '';
         
         // Get the callbacks for letter boxes
-        const dropCallbacks = window.DragDropManager.getLetterBoxCallbacks(() => {
-            window.EventBus.publish('allLettersPlaced', null);
-        });
+        let dropCallbacks = null;
+        if (window.DragDropManager && typeof window.DragDropManager.getLetterBoxCallbacks === 'function') {
+            dropCallbacks = window.DragDropManager.getLetterBoxCallbacks(() => {
+                if (window.EventBus) {
+                    window.EventBus.publish('allLettersPlaced', null);
+                }
+            });
+        }
         
         // Create a letter box for each character
         for (let i = 0; i < word.length; i++) {
-            const letterBox = window.UIFactory.createLetterBox(i, dropCallbacks);
+            // Create letter box
+            const letterBox = document.createElement('div');
+            letterBox.className = 'letter-box';
+            letterBox.setAttribute('data-position', i);
+            
+            // Add position number indicator (positioned absolutely within the box)
+            const numberIndicator = document.createElement('div');
+            numberIndicator.className = 'position-number';
+            numberIndicator.textContent = i + 1; // Add 1 because position is zero-based
+            letterBox.appendChild(numberIndicator);
+            
+            // Add event listeners for drag and drop
+            if (dropCallbacks) {
+                if (dropCallbacks.dragOver) letterBox.addEventListener('dragover', dropCallbacks.dragOver);
+                if (dropCallbacks.dragEnter) letterBox.addEventListener('dragenter', dropCallbacks.dragEnter);
+                if (dropCallbacks.dragLeave) letterBox.addEventListener('dragleave', dropCallbacks.dragLeave);
+                if (dropCallbacks.drop) letterBox.addEventListener('drop', dropCallbacks.drop);
+            }
+            
             _elements.dropArea.appendChild(letterBox);
         }
     }
@@ -109,6 +148,12 @@ const WordController = (function() {
      */
     function _loadNextWord() {
         try {
+            // Safety check for GameState
+            if (!window.GameState || typeof window.GameState.getState !== 'function') {
+                console.error('GameState not properly initialized');
+                return false;
+            }
+            
             const gameState = window.GameState.getState();
             
             // Reset hint status
@@ -116,15 +161,27 @@ const WordController = (function() {
                 hintUsed: false
             });
             
-            let availableWords = gameState.availableWords;
+            let availableWords = gameState.availableWords || [];
             
             // If no words available, get words from Word Manager
             if (availableWords.length === 0) {
-                availableWords = window.WordManager.getWords();
+                if (window.WordManager && typeof window.WordManager.getWords === 'function') {
+                    availableWords = window.WordManager.getWords();
+                } else {
+                    console.warn('WordManager not properly initialized, using fallback words');
+                }
                 
                 // Fallback to default words if still no words available
                 if (!availableWords || availableWords.length === 0) {
-                    availableWords = window.GameConfig.get('defaultWords');
+                    if (window.GameConfig && typeof window.GameConfig.get === 'function') {
+                        availableWords = window.GameConfig.get('defaultWords');
+                    } else {
+                        // Hard-coded fallback if GameConfig is not available
+                        availableWords = [
+                            'apple', 'banana', 'cat', 'dog', 'elephant', 
+                            'flower', 'garden', 'house', 'ice', 'jungle'
+                        ];
+                    }
                     console.log('Using fallback words');
                 }
                 
@@ -143,7 +200,10 @@ const WordController = (function() {
             updatedWords.splice(randomIndex, 1);
             
             // Get image URL for word
-            const currentImageUrl = window.WordManager.getWordImage(currentWord);
+            let currentImageUrl = null;
+            if (window.WordManager && typeof window.WordManager.getWordImage === 'function') {
+                currentImageUrl = window.WordManager.getWordImage(currentWord);
+            }
             
             // Scramble the word
             const scrambledWord = _scrambleWord(currentWord);
@@ -157,7 +217,9 @@ const WordController = (function() {
             });
             
             // Set up pronunciation
-            window.AudioService.setupPronunciation(currentWord);
+            if (window.AudioService && typeof window.AudioService.setupPronunciation === 'function') {
+                window.AudioService.setupPronunciation(currentWord);
+            }
             
             // Display word image
             _displayWordImage(currentImageUrl, currentWord);
@@ -175,10 +237,12 @@ const WordController = (function() {
             }
             
             // Publish event for new word loaded
-            window.EventBus.publish('wordLoaded', {
-                word: currentWord,
-                scrambled: scrambledWord
-            });
+            if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                window.EventBus.publish('wordLoaded', {
+                    word: currentWord,
+                    scrambled: scrambledWord
+                });
+            }
             
             return true;
         } catch (error) {
@@ -188,20 +252,24 @@ const WordController = (function() {
             const currentWord = 'apple';
             const scrambledWord = 'pplea';
             
-            window.GameState.update({
-                currentWord,
-                scrambledWord
-            });
+            if (window.GameState && typeof window.GameState.update === 'function') {
+                window.GameState.update({
+                    currentWord,
+                    scrambledWord
+                });
+            }
             
             // Create letter boxes and display fallback word
             _createLetterBoxes(currentWord);
             _displayScrambledWord(scrambledWord);
             
             // Publish error event
-            window.EventBus.publish('wordLoadError', {
-                error,
-                fallbackWord: currentWord
-            });
+            if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                window.EventBus.publish('wordLoadError', {
+                    error,
+                    fallbackWord: currentWord
+                });
+            }
             
             return false;
         }
@@ -213,13 +281,21 @@ const WordController = (function() {
      */
     function _showHint() {
         try {
+            // Safety check for GameState
+            if (!window.GameState || typeof window.GameState.update !== 'function') {
+                console.error('GameState not properly initialized');
+                return false;
+            }
+            
             // Mark hint as used
             window.GameState.update({
                 hintUsed: true
             });
             
             // Play hint sound
-            window.AudioService.playSound('hint');
+            if (window.AudioService && typeof window.AudioService.playSound === 'function') {
+                window.AudioService.playSound('hint');
+            }
             
             const gameState = window.GameState.getState();
             
@@ -228,6 +304,11 @@ const WordController = (function() {
             
             // Find matching letter in the scrambled word area
             const scrambledWordElement = document.getElementById('scrambled-word');
+            if (!scrambledWordElement) {
+                console.error('Scrambled word element not found');
+                return false;
+            }
+            
             const letterTiles = scrambledWordElement.querySelectorAll('.letter-tile');
             let matchingTile = null;
             
@@ -243,27 +324,21 @@ const WordController = (function() {
                 const firstLetterBox = _elements.dropArea.querySelector('.letter-box[data-position="0"]');
                 
                 // If first letter box is empty
-                if (firstLetterBox && !firstLetterBox.hasChildNodes()) {
-                    // Clone the tile
-                    const clone = matchingTile.cloneNode(true);
-                    clone.addEventListener('dragstart', window.DragDropManager.dragStart.bind(window.DragDropManager));
-                    clone.addEventListener('dragend', window.DragDropManager.dragEnd.bind(window.DragDropManager));
-                    
-                    // Add to first letter box
-                    firstLetterBox.appendChild(clone);
-                    
-                    // Remove original tile
-                    matchingTile.remove();
+                if (firstLetterBox && !firstLetterBox.querySelector('.letter-tile')) {
+                    // Move the tile to the first letter box
+                    firstLetterBox.appendChild(matchingTile);
                     
                     // Publish hint applied event
-                    window.EventBus.publish('hintApplied', {
-                        letter: firstLetter,
-                        position: 0
-                    });
+                    if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                        window.EventBus.publish('hintApplied', {
+                            letter: firstLetter,
+                            position: 0
+                        });
+                    }
                     
                     // Check if answer is now complete
                     const allBoxesFilled = _elements.dropArea.querySelectorAll('.letter-box:empty').length === 0;
-                    if (allBoxesFilled) {
+                    if (allBoxesFilled && window.EventBus) {
                         window.EventBus.publish('allLettersPlaced', null);
                     }
                     
@@ -276,9 +351,11 @@ const WordController = (function() {
             console.error('Error showing hint:', error);
             
             // Publish error event
-            window.EventBus.publish('hintError', {
-                error
-            });
+            if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                window.EventBus.publish('hintError', {
+                    error
+                });
+            }
             
             return false;
         }
@@ -297,21 +374,33 @@ const WordController = (function() {
                 scrambledWordElement: document.getElementById('scrambled-word')
             };
             
-            // Subscribe to events
-            window.EventBus.subscribe('hintButtonClicked', () => {
-                this.showHint();
-            });
+            if (!_elements.dropArea) {
+                console.error('Drop area element not found during initialization');
+            }
             
-            window.EventBus.subscribe('nextButtonClicked', () => {
-                this.loadNextWord();
-            });
+            if (!_elements.scrambledWordElement) {
+                console.error('Scrambled word element not found during initialization');
+            }
             
-            // Subscribe to state changes related to words
-            window.EventBus.subscribe('stateChanged', (data) => {
-                if (data.changes.scrambledWord) {
-                    _displayScrambledWord(data.changes.scrambledWord.newValue);
-                }
-            });
+            // Subscribe to events if EventBus is available
+            if (window.EventBus && typeof window.EventBus.subscribe === 'function') {
+                window.EventBus.subscribe('hintButtonClicked', () => {
+                    this.showHint();
+                });
+                
+                window.EventBus.subscribe('nextButtonClicked', () => {
+                    this.loadNextWord();
+                });
+                
+                // Subscribe to state changes related to words
+                window.EventBus.subscribe('stateChanged', (data) => {
+                    if (data && data.changes && data.changes.scrambledWord) {
+                        _displayScrambledWord(data.changes.scrambledWord.newValue);
+                    }
+                });
+            } else {
+                console.warn('EventBus not available, button events will not work');
+            }
             
             return this;
         },

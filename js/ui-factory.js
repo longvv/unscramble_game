@@ -20,11 +20,11 @@ const UIFactory = (function() {
             tile.id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
             
             // Add drag event listeners
-            if (dragStartCallback) {
+            if (typeof dragStartCallback === 'function') {
                 tile.addEventListener('dragstart', dragStartCallback);
             }
             
-            if (dragEndCallback) {
+            if (typeof dragEndCallback === 'function') {
                 tile.addEventListener('dragend', dragEndCallback);
             }
             
@@ -50,19 +50,19 @@ const UIFactory = (function() {
             
             // Set up drop event listeners if callbacks provided
             if (dropCallbacks) {
-                if (dropCallbacks.dragOver) {
+                if (typeof dropCallbacks.dragOver === 'function') {
                     letterBox.addEventListener('dragover', dropCallbacks.dragOver);
                 }
                 
-                if (dropCallbacks.dragEnter) {
+                if (typeof dropCallbacks.dragEnter === 'function') {
                     letterBox.addEventListener('dragenter', dropCallbacks.dragEnter);
                 }
                 
-                if (dropCallbacks.dragLeave) {
+                if (typeof dropCallbacks.dragLeave === 'function') {
                     letterBox.addEventListener('dragleave', dropCallbacks.dragLeave);
                 }
                 
-                if (dropCallbacks.drop) {
+                if (typeof dropCallbacks.drop === 'function') {
                     letterBox.addEventListener('drop', dropCallbacks.drop);
                 }
             }
@@ -102,7 +102,7 @@ const UIFactory = (function() {
             deleteBtn.className = 'delete-word-btn';
             deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
             
-            if (deleteCallback) {
+            if (typeof deleteCallback === 'function') {
                 deleteBtn.addEventListener('click', () => deleteCallback(wordItem, word));
             }
             
@@ -116,20 +116,38 @@ const UIFactory = (function() {
          * @returns {Object} Object with created celebration elements
          */
         createCelebrationContent: function() {
+            // Safety check for GameConfig
+            if (!window.GameConfig || typeof window.GameConfig.get !== 'function') {
+                console.error('GameConfig not available for createCelebrationContent');
+                return { heading: 'Great Job!', message: 'You solved the word!' };
+            }
+            
             // Get random congratulation messages
-            const headings = GameConfig.get('congratsMessages').headings;
-            const messages = GameConfig.get('congratsMessages').messages;
+            let headings = ['Great Job!'];
+            let messages = ['You solved the word!'];
+            
+            try {
+                const congratsMessages = window.GameConfig.get('congratsMessages');
+                if (congratsMessages) {
+                    headings = congratsMessages.headings || headings;
+                    messages = congratsMessages.messages || messages;
+                }
+            } catch (error) {
+                console.error('Error getting congratulation messages:', error);
+            }
             
             const heading = headings[Math.floor(Math.random() * headings.length)];
             const message = messages[Math.floor(Math.random() * messages.length)];
             
             // Update celebration heading and message
             const celebrationOverlay = document.getElementById('celebration-overlay');
-            const headingElement = celebrationOverlay.querySelector('h2');
-            const messageElement = celebrationOverlay.querySelector('p');
-            
-            headingElement.textContent = heading;
-            messageElement.textContent = message;
+            if (celebrationOverlay) {
+                const headingElement = celebrationOverlay.querySelector('h2');
+                const messageElement = celebrationOverlay.querySelector('p');
+                
+                if (headingElement) headingElement.textContent = heading;
+                if (messageElement) messageElement.textContent = message;
+            }
             
             return { heading, message };
         },
@@ -142,8 +160,12 @@ const UIFactory = (function() {
         createImagePreview: function(dataUrl, previewElement) {
             if (!previewElement) return;
             
-            previewElement.style.backgroundImage = `url('${dataUrl}')`;
-            previewElement.classList.add('has-image');
+            try {
+                previewElement.style.backgroundImage = `url('${dataUrl}')`;
+                previewElement.classList.add('has-image');
+            } catch (error) {
+                console.error('Error creating image preview:', error);
+            }
         },
         
         /**
@@ -153,8 +175,12 @@ const UIFactory = (function() {
         resetImagePreview: function(previewElement) {
             if (!previewElement) return;
             
-            previewElement.style.backgroundImage = '';
-            previewElement.classList.remove('has-image');
+            try {
+                previewElement.style.backgroundImage = '';
+                previewElement.classList.remove('has-image');
+            } catch (error) {
+                console.error('Error resetting image preview:', error);
+            }
         }
     };
 })();

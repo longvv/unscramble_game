@@ -2,126 +2,14 @@
  * Main entry point for Word Scramble Game
  * Initializes all modules and starts the game
  * - Updated to use the new architecture with EventBus and GameState
+ * - Added fallback for missing DragDropManager
  */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Word Scramble Game...');
     
     try {
         // Initialize modules in correct order (dependencies first)
-        
-        // 1. Core modules (no dependencies)
-        if (window.GameConfig) {
-            console.log('Initializing GameConfig...');
-        } else {
-            console.error('GameConfig not found!');
-        }
-        
-        // 2. EventBus (communication bus)
-        if (window.EventBus) {
-            console.log('Initializing EventBus...');
-        } else {
-            console.error('EventBus not found!');
-            // Create a simple event bus if not found to avoid breaking everything
-            window.EventBus = {
-                subscribe: () => console.warn('EventBus not properly initialized!'),
-                publish: () => console.warn('EventBus not properly initialized!'),
-                unsubscribe: () => console.warn('EventBus not properly initialized!')
-            };
-        }
-        
-        // 3. Services (depend on GameConfig)
-        if (window.StorageService) {
-            console.log('Initializing StorageService...');
-        } else {
-            console.error('StorageService not found!');
-        }
-        
-        if (window.AudioService) {
-            console.log('Initializing AudioService...');
-            window.AudioService.init();
-        } else {
-            console.error('AudioService not found!');
-        }
-        
-        // 4. UI Factory (depends on GameConfig)
-        if (window.UIFactory) {
-            console.log('Initializing UIFactory...');
-        } else {
-            console.error('UIFactory not found!');
-        }
-        
-        // 5. Game State (depends on EventBus)
-        if (window.GameState) {
-            console.log('Initializing GameState...');
-            window.GameState.init();
-        } else {
-            console.error('GameState not found!');
-        }
-        
-        // 6. DragDropManager (depends on EventBus)
-        if (window.DragDropManager) {
-            console.log('Initializing DragDropManager...');
-            window.DragDropManager.init();
-        } else {
-            console.error('DragDropManager not found!');
-        }
-        
-        // 7. Word Manager (depends on StorageService, UIFactory)
-        if (window.WordManager) {
-            console.log('Initializing WordManager...');
-            window.WordManager.init({
-                newWordInput: document.getElementById('new-word-input'),
-                addWordBtn: document.getElementById('add-word-btn'),
-                imageUploadArea: document.getElementById('image-upload-area'),
-                imageUpload: document.getElementById('image-upload'),
-                imagePreview: document.getElementById('image-preview'),
-                wordList: document.getElementById('word-items')
-            });
-        } else {
-            console.error('WordManager not found!');
-        }
-        
-        // 8. Word Controller (depends on WordManager, GameState, EventBus)
-        if (window.WordController) {
-            console.log('Initializing WordController...');
-            window.WordController.init();
-        } else {
-            console.error('WordController not found!');
-        }
-        
-        // 9. Input Managers (depend on EventBus)
-        if (window.InputManager) {
-            console.log('Initializing InputManager...');
-            window.InputManager.init();
-        } else {
-            console.error('InputManager not found!');
-        }
-        
-        // Initialize TouchDragManager after InputManager
-        if (window.TouchDragManager) {
-            console.log('Initializing TouchDragManager...');
-            window.TouchDragManager.init();
-        } else {
-            console.log('TouchDragManager not found or not needed on this device');
-        }
-        
-        // 10. Game Controller (depends on all other modules)
-        if (window.GameController) {
-            console.log('Initializing GameController...');
-            window.GameController.init();
-            console.log('Game initialization complete!');
-            
-            // Subscribe to game initialization events
-            window.EventBus.subscribe('gameInitialized', () => {
-                console.log('Game initialized successfully!');
-            });
-            
-            window.EventBus.subscribe('gameInitError', (data) => {
-                console.error('Game initialization error:', data.error);
-            });
-        } else {
-            console.error('GameController not found!');
-        }
+        initializeModules();
         
         // Add share button with a slight delay to ensure DOM is ready
         setTimeout(() => {
@@ -134,10 +22,247 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
+ * Initialize modules in the correct dependency order
+ */
+function initializeModules() {
+    // 1. Core modules (no dependencies)
+    if (window.GameConfig) {
+        console.log('GameConfig loaded');
+    } else {
+        console.error('GameConfig not found!');
+    }
+    
+    // 2. EventBus (communication bus)
+    if (window.EventBus) {
+        console.log('EventBus loaded');
+    } else {
+        console.error('EventBus not found!');
+        // Create a simple event bus if not found to avoid breaking everything
+        window.EventBus = {
+            subscribe: function(event, callback) {
+                console.warn('EventBus not properly initialized!');
+                return false;
+            },
+            publish: function(event, data) {
+                console.warn('EventBus not properly initialized!');
+                return false;
+            },
+            unsubscribe: function(event, callback) {
+                console.warn('EventBus not properly initialized!');
+                return false;
+            }
+        };
+    }
+    
+    // 3. Services (depend on GameConfig)
+    if (window.StorageService) {
+        console.log('StorageService loaded');
+    } else {
+        console.error('StorageService not found!');
+    }
+    
+    if (window.AudioService) {
+        console.log('Initializing AudioService...');
+        try {
+            window.AudioService.init();
+            console.log('AudioService initialized');
+        } catch (error) {
+            console.error('Error initializing AudioService:', error);
+        }
+    } else {
+        console.error('AudioService not found!');
+    }
+    
+    // 4. UI Factory (depends on GameConfig)
+    if (window.UIFactory) {
+        console.log('UIFactory loaded');
+    } else {
+        console.error('UIFactory not found!');
+    }
+    
+    // 5. Game State (depends on EventBus)
+    if (window.GameState) {
+        console.log('Initializing GameState...');
+        try {
+            window.GameState.init();
+            console.log('GameState initialized');
+        } catch (error) {
+            console.error('Error initializing GameState:', error);
+        }
+    } else {
+        console.error('GameState not found!');
+    }
+    
+    // 6. Check for DragDropManager and create fallback if not present
+    if (!window.DragDropManager) {
+        console.warn('DragDropManager not found! Creating fallback implementation...');
+        
+        // Create a minimal fallback implementation
+        window.DragDropManager = {
+            init: function() {
+                console.log('Using fallback DragDropManager');
+                return this;
+            },
+            
+            dragStart: function(e) {
+                e.dataTransfer.setData('text/plain', e.target.id);
+                e.target.classList.add('dragging');
+                
+                if (window.AudioService && typeof window.AudioService.playSound === 'function') {
+                    window.AudioService.playSound('drag');
+                }
+            },
+            
+            dragEnd: function(e) {
+                e.target.classList.remove('dragging');
+            },
+            
+            setupDropAreaListeners: function() {
+                return this;
+            },
+            
+            setupScrambledAreaListeners: function() {
+                return this;
+            },
+            
+            getLetterBoxCallbacks: function(callback) {
+                return {
+                    dragOver: function(e) { e.preventDefault(); },
+                    dragEnter: function(e) { 
+                        e.preventDefault();
+                        e.target.classList.add('drag-over');
+                    },
+                    dragLeave: function(e) { 
+                        e.target.classList.remove('drag-over');
+                    },
+                    drop: function(e) {
+                        e.preventDefault();
+                        e.target.classList.remove('drag-over');
+                        
+                        const id = e.dataTransfer.getData('text/plain');
+                        const draggedElement = document.getElementById(id);
+                        
+                        if (draggedElement) {
+                            e.target.appendChild(draggedElement);
+                            
+                            if (window.AudioService) {
+                                window.AudioService.playSound('drag');
+                            }
+                            
+                            if (callback) callback();
+                        }
+                    }
+                };
+            }
+        };
+    }
+    
+    // Initialize DragDropManager
+    console.log('Initializing DragDropManager...');
+    try {
+        window.DragDropManager.init();
+        console.log('DragDropManager initialized');
+    } catch (error) {
+        console.error('Error initializing DragDropManager:', error);
+    }
+    
+    // 7. Word Manager (depends on StorageService, UIFactory)
+    if (window.WordManager) {
+        console.log('Initializing WordManager...');
+        try {
+            const wordManagerElements = {
+                newWordInput: document.getElementById('new-word-input'),
+                addWordBtn: document.getElementById('add-word-btn'),
+                imageUploadArea: document.getElementById('image-upload-area'),
+                imageUpload: document.getElementById('image-upload'),
+                imagePreview: document.getElementById('image-preview'),
+                wordList: document.getElementById('word-items')
+            };
+            
+            window.WordManager.init(wordManagerElements);
+            console.log('WordManager initialized');
+        } catch (error) {
+            console.error('Error initializing WordManager:', error);
+        }
+    } else {
+        console.error('WordManager not found!');
+    }
+    
+    // 8. Word Controller (depends on WordManager, GameState, EventBus)
+    if (window.WordController) {
+        console.log('Initializing WordController...');
+        try {
+            window.WordController.init();
+            console.log('WordController initialized');
+        } catch (error) {
+            console.error('Error initializing WordController:', error);
+        }
+    } else {
+        console.error('WordController not found!');
+    }
+    
+    // 9. Input Managers (depend on EventBus)
+    if (window.InputManager) {
+        console.log('Initializing InputManager...');
+        try {
+            window.InputManager.init();
+            console.log('InputManager initialized');
+        } catch (error) {
+            console.error('Error initializing InputManager:', error);
+        }
+    } else {
+        console.error('InputManager not found!');
+    }
+    
+    // Initialize TouchDragManager after InputManager
+    if (window.TouchDragManager) {
+        console.log('Initializing TouchDragManager...');
+        try {
+            window.TouchDragManager.init();
+            console.log('TouchDragManager initialized');
+        } catch (error) {
+            console.error('Error initializing TouchDragManager:', error);
+        }
+    } else {
+        console.log('TouchDragManager not found or not needed on this device');
+    }
+    
+    // 10. Game Controller (depends on all other modules)
+    if (window.GameController) {
+        console.log('Initializing GameController...');
+        try {
+            window.GameController.init();
+            console.log('Game initialization complete!');
+            
+            // Subscribe to game initialization events
+            if (window.EventBus) {
+                window.EventBus.subscribe('gameInitialized', () => {
+                    console.log('Game initialized successfully!');
+                });
+                
+                window.EventBus.subscribe('gameInitError', (data) => {
+                    console.error('Game initialization error:', data ? data.error : 'Unknown error');
+                });
+            }
+        } catch (error) {
+            console.error('Error initializing GameController:', error);
+        }
+    } else {
+        console.error('GameController not found!');
+    }
+}
+
+/**
  * Add share button to the game UI
  */
 function addShareButton() {
     try {
+        // Check if share button already exists to avoid duplicates
+        if (document.querySelector('.share-button-container')) {
+            console.log('Share button already exists');
+            return;
+        }
+        
         // Create a share button container
         const shareButtonContainer = document.createElement('div');
         shareButtonContainer.className = 'share-button-container';
@@ -195,22 +320,25 @@ function addShareButton() {
         });
         
         // Add button to the game area
+        let buttonAdded = false;
         const buttonContainer = document.querySelector('.buttons-container');
         if (buttonContainer) {
             buttonContainer.appendChild(shareButtonContainer);
             console.log('Share button added to button container');
+            buttonAdded = true;
         } else {
             const gameArea = document.querySelector('.game-area');
             if (gameArea) {
                 gameArea.appendChild(shareButtonContainer);
                 console.log('Share button added to game area');
+                buttonAdded = true;
             } else {
                 console.warn('Could not find a place to add the share button');
             }
         }
         
         // Publish event for share button added
-        if (window.EventBus) {
+        if (buttonAdded && window.EventBus) {
             window.EventBus.publish('shareButtonAdded', null);
         }
     } catch (error) {
@@ -232,9 +360,9 @@ function shareGame(method) {
     
     // Get current score if available
     let score = "";
-    if (window.GameState) {
+    if (window.GameState && typeof window.GameState.getState === 'function') {
         const gameState = window.GameState.getState();
-        score = ` My current score is ${gameState.score}!`;
+        score = gameState && gameState.score !== undefined ? ` My current score is ${gameState.score}!` : "";
     } else {
         const scoreElement = document.getElementById('score');
         score = scoreElement ? ` My current score is ${scoreElement.textContent}!` : "";

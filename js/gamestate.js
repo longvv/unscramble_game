@@ -41,6 +41,21 @@ const GameState = (function() {
         return changes;
     }
     
+    /**
+     * Safely publish a state change event
+     * @param {string} eventName - Event name to publish
+     * @param {Object} eventData - Event data to publish
+     */
+    function _safelyPublishEvent(eventName, eventData) {
+        if (window.EventBus && typeof window.EventBus.publish === 'function') {
+            try {
+                window.EventBus.publish(eventName, eventData);
+            } catch (error) {
+                console.error(`Error publishing ${eventName} event:`, error);
+            }
+        }
+    }
+    
     // Public API
     return {
         /**
@@ -93,7 +108,7 @@ const GameState = (function() {
                 
                 // Notify about state changes if any occurred
                 if (Object.keys(changes).length > 0) {
-                    window.EventBus.publish('stateChanged', {
+                    _safelyPublishEvent('stateChanged', {
                         changes,
                         oldState,
                         newState: {..._state}
@@ -124,7 +139,7 @@ const GameState = (function() {
             };
             
             // Notify about reset
-            window.EventBus.publish('stateReset', {
+            _safelyPublishEvent('stateReset', {
                 oldState,
                 newState: {..._state}
             });
