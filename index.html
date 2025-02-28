@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Word Scramble Game</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <!-- Comment out the manifest link when running locally via file:// protocol -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -112,7 +113,8 @@
     
     <!-- Scripts -->
     <script>
-        if ('serviceWorker' in navigator) {
+        // Modified service worker registration to only run when not on file:// protocol
+        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
                     .then(registration => {
@@ -123,7 +125,7 @@
                     });
             });
         }
-        </script>
+    </script>
     <script src="js/config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/audio.js"></script>
