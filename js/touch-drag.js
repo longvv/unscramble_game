@@ -32,6 +32,16 @@ const TouchDragManager = (function() {
         // Add specific touch styles
         addTouchStyles();
         
+        // Subscribe to wordLoaded event to apply touch handlers to new tiles
+        if (window.EventBus) {
+            window.EventBus.subscribe('wordLoaded', () => {
+                // Small delay to ensure DOM is updated
+                setTimeout(() => {
+                    applyTouchHandlersToAllTiles();
+                }, 100);
+            });
+        }
+        
         console.log('TouchDragManager initialized');
     }
     
@@ -167,7 +177,18 @@ const TouchDragManager = (function() {
         isDragging = true;
         
         // Play drag sound
-        window.AudioService.playSound('drag');
+        if (window.AudioService) {
+            window.AudioService.playSound('drag');
+        }
+        
+        // Publish event if EventBus is available
+        if (window.EventBus) {
+            window.EventBus.publish('touchDragStart', {
+                element: currentDragTile,
+                letter: currentDragTile.textContent,
+                sourceContainer: currentDragTile.closest('.letter-box') ? 'letter-box' : 'scrambled-word'
+            });
+        }
     }
     
     /**
@@ -242,6 +263,14 @@ const TouchDragManager = (function() {
         
         // Clean up
         cleanupDrag();
+        
+        // Publish event if EventBus is available
+        if (window.EventBus) {
+            window.EventBus.publish('touchDragEnd', {
+                success: !!dropTarget,
+                target: dropTarget ? dropTarget.id : null
+            });
+        }
     }
     
     /**
@@ -316,7 +345,9 @@ const TouchDragManager = (function() {
         }
         
         // Play sound
-        window.AudioService.playSound('drag');
+        if (window.AudioService) {
+            window.AudioService.playSound('drag');
+        }
         
         // Check if answer is complete
         checkAnswer();
@@ -341,7 +372,9 @@ const TouchDragManager = (function() {
             }
             
             // Play sound
-            window.AudioService.playSound('drag');
+            if (window.AudioService) {
+                window.AudioService.playSound('drag');
+            }
         } else {
             // Coming from another position in the scrambled area
             // Find position to insert based on touch Y position
@@ -400,10 +433,19 @@ const TouchDragManager = (function() {
      * Check if the answer is complete and trigger answer checking
      */
     function checkAnswer() {
+        if (!dropArea) return;
+        
         const allBoxesFilled = dropArea.querySelectorAll('.letter-box:empty').length === 0;
-        if (allBoxesFilled && window.GameController && typeof window.GameController.checkAnswer === 'function') {
+        if (allBoxesFilled) {
             setTimeout(() => {
-                window.GameController.checkAnswer();
+                // Trigger answer checking via EventBus if available
+                if (window.EventBus) {
+                    window.EventBus.publish('allLettersPlaced', null);
+                } 
+                // Fallback to GameController
+                else if (window.GameController && typeof window.GameController.checkAnswer === 'function') {
+                    window.GameController.checkAnswer();
+                }
             }, 100);
         }
     }
@@ -436,7 +478,8 @@ const TouchDragManager = (function() {
     
     return {
         init: init,
-        setupTouchHandlers: setupTouchHandlers
+        setupTouchHandlers: setupTouchHandlers,
+        applyTouchHandlersToAllTiles: applyTouchHandlersToAllTiles
     };
 })();
 
