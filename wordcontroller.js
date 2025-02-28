@@ -5,7 +5,8 @@
 const WordController = (function() {
     // Private state (minimized since GameState is now the source of truth)
     let _elements = {
-        dropArea: null
+        dropArea: null,
+        scrambledWordElement: null
     };
     
     // Private methods
@@ -32,6 +33,74 @@ const WordController = (function() {
         }
         
         return scrambled;
+    }
+    
+    /**
+     * Display the scrambled word in the UI
+     * @param {string} scrambledWord - The scrambled word to display
+     */
+    function _displayScrambledWord(scrambledWord) {
+        if (!_elements.scrambledWordElement) return;
+        
+        // Clear existing content
+        _elements.scrambledWordElement.innerHTML = '';
+        
+        // Create letter tiles for each character
+        for (let i = 0; i < scrambledWord.length; i++) {
+            const letter = scrambledWord[i];
+            
+            // Create a letter tile
+            const letterTile = window.UIFactory.createLetterTile(
+                letter,
+                window.DragDropManager.dragStart.bind(window.DragDropManager),
+                window.DragDropManager.dragEnd.bind(window.DragDropManager)
+            );
+            
+            // Add to scrambled word area
+            _elements.scrambledWordElement.appendChild(letterTile);
+        }
+    }
+    
+    /**
+     * Create letter boxes in the drop area
+     * @param {string} word - The current word
+     */
+    function _createLetterBoxes(word) {
+        if (!_elements.dropArea) return;
+        
+        // Clear existing content
+        _elements.dropArea.innerHTML = '';
+        
+        // Get the callbacks for letter boxes
+        const dropCallbacks = window.DragDropManager.getLetterBoxCallbacks(() => {
+            window.EventBus.publish('allLettersPlaced', null);
+        });
+        
+        // Create a letter box for each character
+        for (let i = 0; i < word.length; i++) {
+            const letterBox = window.UIFactory.createLetterBox(i, dropCallbacks);
+            _elements.dropArea.appendChild(letterBox);
+        }
+    }
+    
+    /**
+     * Display word image
+     * @param {string} imageUrl - Image URL for the word
+     * @param {string} word - The current word for alt text
+     */
+    function _displayWordImage(imageUrl, word) {
+        const wordImageElement = document.getElementById('word-image');
+        if (!wordImageElement) return;
+        
+        if (imageUrl) {
+            wordImageElement.src = imageUrl;
+            wordImageElement.alt = word;
+        } else {
+            // Use a placeholder or generated image
+            const placeholderUrl = `https://source.unsplash.com/300x200/?${encodeURIComponent(word)}`;
+            wordImageElement.src = placeholderUrl;
+            wordImageElement.alt = word;
+        }
     }
     
     /**
@@ -90,6 +159,21 @@ const WordController = (function() {
             // Set up pronunciation
             window.AudioService.setupPronunciation(currentWord);
             
+            // Display word image
+            _displayWordImage(currentImageUrl, currentWord);
+            
+            // Create letter boxes in drop area
+            _createLetterBoxes(currentWord);
+            
+            // Display scrambled word
+            _displayScrambledWord(scrambledWord);
+            
+            // Reset check button
+            const checkBtn = document.getElementById('check-btn');
+            if (checkBtn) {
+                checkBtn.disabled = false;
+            }
+            
             // Publish event for new word loaded
             window.EventBus.publish('wordLoaded', {
                 word: currentWord,
@@ -108,6 +192,10 @@ const WordController = (function() {
                 currentWord,
                 scrambledWord
             });
+            
+            // Create letter boxes and display fallback word
+            _createLetterBoxes(currentWord);
+            _displayScrambledWord(scrambledWord);
             
             // Publish error event
             window.EventBus.publish('wordLoadError', {
@@ -205,7 +293,8 @@ const WordController = (function() {
         init: function() {
             // Get DOM elements
             _elements = {
-                dropArea: document.getElementById('drop-area')
+                dropArea: document.getElementById('drop-area'),
+                scrambledWordElement: document.getElementById('scrambled-word')
             };
             
             // Subscribe to events
@@ -215,6 +304,13 @@ const WordController = (function() {
             
             window.EventBus.subscribe('nextButtonClicked', () => {
                 this.loadNextWord();
+            });
+            
+            // Subscribe to state changes related to words
+            window.EventBus.subscribe('stateChanged', (data) => {
+                if (data.changes.scrambledWord) {
+                    _displayScrambledWord(data.changes.scrambledWord.newValue);
+                }
             });
             
             return this;

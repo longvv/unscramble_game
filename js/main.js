@@ -58,7 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('GameState not found!');
         }
         
-        // 6. Word Manager (depends on StorageService, UIFactory)
+        // 6. DragDropManager (depends on EventBus)
+        if (window.DragDropManager) {
+            console.log('Initializing DragDropManager...');
+            window.DragDropManager.init();
+        } else {
+            console.error('DragDropManager not found!');
+        }
+        
+        // 7. Word Manager (depends on StorageService, UIFactory)
         if (window.WordManager) {
             console.log('Initializing WordManager...');
             window.WordManager.init({
@@ -73,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('WordManager not found!');
         }
         
-        // 7. Word Controller (depends on WordManager, GameState, EventBus)
+        // 8. Word Controller (depends on WordManager, GameState, EventBus)
         if (window.WordController) {
             console.log('Initializing WordController...');
             window.WordController.init();
@@ -81,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('WordController not found!');
         }
         
-        // 8. Input Manager (depends on EventBus)
+        // 9. Input Managers (depend on EventBus)
         if (window.InputManager) {
             console.log('Initializing InputManager...');
             window.InputManager.init();
@@ -89,7 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('InputManager not found!');
         }
         
-        // 9. Game Controller (depends on all other modules)
+        // Initialize TouchDragManager after InputManager
+        if (window.TouchDragManager) {
+            console.log('Initializing TouchDragManager...');
+            window.TouchDragManager.init();
+        } else {
+            console.log('TouchDragManager not found or not needed on this device');
+        }
+        
+        // 10. Game Controller (depends on all other modules)
         if (window.GameController) {
             console.log('Initializing GameController...');
             window.GameController.init();

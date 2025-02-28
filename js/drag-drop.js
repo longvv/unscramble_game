@@ -16,6 +16,21 @@ const DragDropManager = (function() {
          */
         init: function(gameController) {
             _gameController = gameController;
+            
+            // Set up drop area and scrambled word area listeners
+            const dropArea = document.getElementById('drop-area');
+            const scrambledWordElement = document.getElementById('scrambled-word');
+            
+            if (dropArea) {
+                this.setupDropAreaListeners(dropArea, () => {
+                    window.EventBus.publish('allLettersPlaced', null);
+                });
+            }
+            
+            if (scrambledWordElement) {
+                this.setupScrambledAreaListeners(scrambledWordElement);
+            }
+            
             return this;
         },
         
@@ -26,6 +41,8 @@ const DragDropManager = (function() {
         dragStart: function(e) {
             _draggedItem = e.target;
             e.dataTransfer.setData('text/plain', e.target.id);
+            e.dataTransfer.setData('source-container', 
+                e.target.closest('.letter-box') ? 'letter-box' : 'scrambled-word');
             e.target.classList.add('dragging');
             
             // Create a better drag image that's visible during dragging
@@ -47,7 +64,9 @@ const DragDropManager = (function() {
             }, 0);
             
             // Play drag sound
-            window.AudioService.playSound('drag');
+            if (window.AudioService) {
+                window.AudioService.playSound('drag');
+            }
         },
         
         /**
@@ -98,6 +117,7 @@ const DragDropManager = (function() {
             
             // Get data and elements
             const id = e.dataTransfer.getData('text/plain');
+            const sourceContainer = e.dataTransfer.getData('source-container');
             const draggedElement = document.getElementById(id);
             
             if (!draggedElement) return;
@@ -113,9 +133,10 @@ const DragDropManager = (function() {
             // Check if target box already has a letter tile
             const existingTile = targetBox.querySelector('.letter-tile');
             
-            // Create clone of the dragged tile
+            // Clone the dragged tile to preserve event listeners
             const clone = draggedElement.cloneNode(true);
             clone.classList.remove('dragging');
+            clone.id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
             
             // Add new event listeners to the clone
             clone.addEventListener('dragstart', this.dragStart);
@@ -126,6 +147,7 @@ const DragDropManager = (function() {
                 // Create a clone of the existing tile
                 const existingClone = existingTile.cloneNode(true);
                 existingClone.classList.remove('dragging');
+                existingClone.id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
                 
                 // Add event listeners to the existing tile clone
                 existingClone.addEventListener('dragstart', this.dragStart);
@@ -156,7 +178,9 @@ const DragDropManager = (function() {
             }
             
             // Play a sound feedback
-            window.AudioService.playSound('drag');
+            if (window.AudioService) {
+                window.AudioService.playSound('drag');
+            }
             
             // Check if answer is complete
             if (typeof checkAnswerCallback === 'function') {
@@ -188,6 +212,7 @@ const DragDropManager = (function() {
                 // Clone the element to avoid issues with removal
                 const clone = draggedElement.cloneNode(true);
                 clone.classList.remove('dragging');
+                clone.id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
                 
                 // Add new event listeners to the clone
                 clone.addEventListener('dragstart', this.dragStart);
@@ -196,6 +221,11 @@ const DragDropManager = (function() {
                 // Add to target and remove original
                 emptyBox.appendChild(clone);
                 draggedElement.remove();
+                
+                // Play sound
+                if (window.AudioService) {
+                    window.AudioService.playSound('drag');
+                }
                 
                 // Check if answer is complete
                 if (typeof checkAnswerCallback === 'function') {
@@ -217,29 +247,39 @@ const DragDropManager = (function() {
             
             // Get data and elements
             const id = e.dataTransfer.getData('text/plain');
+            const sourceContainer = e.dataTransfer.getData('source-container');
             const draggedElement = document.getElementById(id);
             
             if (!draggedElement) return;
             
-            // Find position to insert based on mouse Y position
-            const afterElement = this.getDragAfterElement(scrambledWordElement, e.clientY);
-            
-            // Clone the element to avoid issues with removal
-            const clone = draggedElement.cloneNode(true);
-            clone.classList.remove('dragging');
-            
-            // Add new event listeners to the clone
-            clone.addEventListener('dragstart', this.dragStart);
-            clone.addEventListener('dragend', this.dragEnd);
-            
-            // Insert at appropriate position and remove original
-            if (afterElement) {
-                scrambledWordElement.insertBefore(clone, afterElement);
-            } else {
-                scrambledWordElement.appendChild(clone);
+            // Only process if coming from letter box
+            if (sourceContainer === 'letter-box') {
+                // Find position to insert based on mouse Y position
+                const afterElement = this.getDragAfterElement(scrambledWordElement, e.clientY);
+                
+                // Clone the element to avoid issues with removal
+                const clone = draggedElement.cloneNode(true);
+                clone.classList.remove('dragging');
+                clone.id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                
+                // Add new event listeners to the clone
+                clone.addEventListener('dragstart', this.dragStart);
+                clone.addEventListener('dragend', this.dragEnd);
+                
+                // Insert at appropriate position and remove original
+                if (afterElement) {
+                    scrambledWordElement.insertBefore(clone, afterElement);
+                } else {
+                    scrambledWordElement.appendChild(clone);
+                }
+                
+                draggedElement.remove();
+                
+                // Play sound
+                if (window.AudioService) {
+                    window.AudioService.playSound('drag');
+                }
             }
-            
-            draggedElement.remove();
         },
         
         /**
