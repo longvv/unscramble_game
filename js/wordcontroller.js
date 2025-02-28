@@ -428,9 +428,16 @@ const WordController = (function() {
          */
         getScrambledWord: function(word) {
             return _scrambleWord(word);
-        }
+        },
     };
 })();
+
+window.EventBus.subscribe('pronounceButtonClicked', () => {
+    // Call the pronounceWord method from AudioService
+    if (window.AudioService && typeof window.AudioService.pronounceWord === 'function') {
+        window.AudioService.pronounceWord();
+    }
+});
 
 // Export the module
 window.WordController = WordController;
