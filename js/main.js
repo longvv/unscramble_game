@@ -1,93 +1,206 @@
 /**
  * Main entry point for Word Scramble Game
  * Initializes all modules and starts the game
+ * - Updated to use the new architecture with EventBus and GameState
  */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Word Scramble Game...');
     
     try {
-        // Initialize game controller (which initializes other modules)
-        GameController.init();
-        console.log('Game initialization complete!');
-
+        // Initialize modules in correct order (dependencies first)
+        
+        // 1. Core modules (no dependencies)
+        if (window.GameConfig) {
+            console.log('Initializing GameConfig...');
+        } else {
+            console.error('GameConfig not found!');
+        }
+        
+        // 2. EventBus (communication bus)
+        if (window.EventBus) {
+            console.log('Initializing EventBus...');
+        } else {
+            console.error('EventBus not found!');
+            // Create a simple event bus if not found to avoid breaking everything
+            window.EventBus = {
+                subscribe: () => console.warn('EventBus not properly initialized!'),
+                publish: () => console.warn('EventBus not properly initialized!'),
+                unsubscribe: () => console.warn('EventBus not properly initialized!')
+            };
+        }
+        
+        // 3. Services (depend on GameConfig)
+        if (window.StorageService) {
+            console.log('Initializing StorageService...');
+        } else {
+            console.error('StorageService not found!');
+        }
+        
+        if (window.AudioService) {
+            console.log('Initializing AudioService...');
+            window.AudioService.init();
+        } else {
+            console.error('AudioService not found!');
+        }
+        
+        // 4. UI Factory (depends on GameConfig)
+        if (window.UIFactory) {
+            console.log('Initializing UIFactory...');
+        } else {
+            console.error('UIFactory not found!');
+        }
+        
+        // 5. Game State (depends on EventBus)
+        if (window.GameState) {
+            console.log('Initializing GameState...');
+            window.GameState.init();
+        } else {
+            console.error('GameState not found!');
+        }
+        
+        // 6. Word Manager (depends on StorageService, UIFactory)
+        if (window.WordManager) {
+            console.log('Initializing WordManager...');
+            window.WordManager.init({
+                newWordInput: document.getElementById('new-word-input'),
+                addWordBtn: document.getElementById('add-word-btn'),
+                imageUploadArea: document.getElementById('image-upload-area'),
+                imageUpload: document.getElementById('image-upload'),
+                imagePreview: document.getElementById('image-preview'),
+                wordList: document.getElementById('word-items')
+            });
+        } else {
+            console.error('WordManager not found!');
+        }
+        
+        // 7. Word Controller (depends on WordManager, GameState, EventBus)
+        if (window.WordController) {
+            console.log('Initializing WordController...');
+            window.WordController.init();
+        } else {
+            console.error('WordController not found!');
+        }
+        
+        // 8. Input Manager (depends on EventBus)
+        if (window.InputManager) {
+            console.log('Initializing InputManager...');
+            window.InputManager.init();
+        } else {
+            console.error('InputManager not found!');
+        }
+        
+        // 9. Game Controller (depends on all other modules)
+        if (window.GameController) {
+            console.log('Initializing GameController...');
+            window.GameController.init();
+            console.log('Game initialization complete!');
+            
+            // Subscribe to game initialization events
+            window.EventBus.subscribe('gameInitialized', () => {
+                console.log('Game initialized successfully!');
+            });
+            
+            window.EventBus.subscribe('gameInitError', (data) => {
+                console.error('Game initialization error:', data.error);
+            });
+        } else {
+            console.error('GameController not found!');
+        }
+        
         // Add share button with a slight delay to ensure DOM is ready
         setTimeout(() => {
-            // Create a share button container
-            const shareButtonContainer = document.createElement('div');
-            shareButtonContainer.className = 'share-button-container';
-            
-            // Create main share button
-            const shareButton = document.createElement('button');
-            shareButton.className = 'game-btn primary share-btn';
-            shareButton.innerHTML = '<i class="fas fa-share-alt"></i> Share Game';
-            
-            // Create share dropdown for options
-            const shareDropdown = document.createElement('div');
-            shareDropdown.className = 'share-dropdown';
-            
-            // Share options
-            const shareOptions = [
-                { name: 'Email', icon: 'fa-envelope', action: 'email' },
-                { name: 'SMS', icon: 'fa-sms', action: 'sms' },
-                { name: 'Facebook', icon: 'fa-facebook-messenger', action: 'facebook' },
-                { name: 'Telegram', icon: 'fa-telegram', action: 'telegram' }
-            ];
-            
-            // Create share items
-            shareOptions.forEach(option => {
-                const item = document.createElement('button');
-                item.className = 'share-option';
-                item.innerHTML = `<i class="fas ${option.icon}"></i> ${option.name}`;
-                item.setAttribute('data-share-action', option.action);
-                shareDropdown.appendChild(item);
-                
-                // Add click handler for each option
-                item.addEventListener('click', () => {
-                    shareGame(option.action);
-                });
-            });
-            
-            // Append dropdown to container
-            shareButtonContainer.appendChild(shareButton);
-            shareButtonContainer.appendChild(shareDropdown);
-            
-            // Toggle dropdown visibility when main button is clicked
-            shareButton.addEventListener('click', () => {
-                // Use Web Share API if available and button is clicked directly
-                if (navigator.share) {
-                    shareGame('native');
-                } else {
-                    shareDropdown.classList.toggle('active');
-                }
-            });
-            
-            // Hide dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!shareButtonContainer.contains(e.target)) {
-                    shareDropdown.classList.remove('active');
-                }
-            });
-            
-            // Add button to the game area
-            const buttonContainer = document.querySelector('.buttons-container');
-            if (buttonContainer) {
-                buttonContainer.appendChild(shareButtonContainer);
-                console.log('Share button added to button container');
-            } else {
-                const gameArea = document.querySelector('.game-area');
-                if (gameArea) {
-                    gameArea.appendChild(shareButtonContainer);
-                    console.log('Share button added to game area');
-                } else {
-                    console.warn('Could not find a place to add the share button');
-                }
-            }
-        }, 1000); // Wait for game to fully initialize
-
+            addShareButton();
+        }, 1000);
+        
     } catch (error) {
-        console.error('Error initializing game:', error);
+        console.error('Critical error initializing game:', error);
     }
 });
+
+/**
+ * Add share button to the game UI
+ */
+function addShareButton() {
+    try {
+        // Create a share button container
+        const shareButtonContainer = document.createElement('div');
+        shareButtonContainer.className = 'share-button-container';
+        
+        // Create main share button
+        const shareButton = document.createElement('button');
+        shareButton.className = 'game-btn primary share-btn';
+        shareButton.innerHTML = '<i class="fas fa-share-alt"></i> Share Game';
+        
+        // Create share dropdown for options
+        const shareDropdown = document.createElement('div');
+        shareDropdown.className = 'share-dropdown';
+        
+        // Share options
+        const shareOptions = [
+            { name: 'Email', icon: 'fa-envelope', action: 'email' },
+            { name: 'SMS', icon: 'fa-sms', action: 'sms' },
+            { name: 'Facebook', icon: 'fa-facebook-messenger', action: 'facebook' },
+            { name: 'Telegram', icon: 'fa-telegram', action: 'telegram' }
+        ];
+        
+        // Create share items
+        shareOptions.forEach(option => {
+            const item = document.createElement('button');
+            item.className = 'share-option';
+            item.innerHTML = `<i class="fas ${option.icon}"></i> ${option.name}`;
+            item.setAttribute('data-share-action', option.action);
+            shareDropdown.appendChild(item);
+            
+            // Add click handler for each option
+            item.addEventListener('click', () => {
+                shareGame(option.action);
+            });
+        });
+        
+        // Append dropdown to container
+        shareButtonContainer.appendChild(shareButton);
+        shareButtonContainer.appendChild(shareDropdown);
+        
+        // Toggle dropdown visibility when main button is clicked
+        shareButton.addEventListener('click', () => {
+            // Use Web Share API if available and button is clicked directly
+            if (navigator.share) {
+                shareGame('native');
+            } else {
+                shareDropdown.classList.toggle('active');
+            }
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!shareButtonContainer.contains(e.target)) {
+                shareDropdown.classList.remove('active');
+            }
+        });
+        
+        // Add button to the game area
+        const buttonContainer = document.querySelector('.buttons-container');
+        if (buttonContainer) {
+            buttonContainer.appendChild(shareButtonContainer);
+            console.log('Share button added to button container');
+        } else {
+            const gameArea = document.querySelector('.game-area');
+            if (gameArea) {
+                gameArea.appendChild(shareButtonContainer);
+                console.log('Share button added to game area');
+            } else {
+                console.warn('Could not find a place to add the share button');
+            }
+        }
+        
+        // Publish event for share button added
+        if (window.EventBus) {
+            window.EventBus.publish('shareButtonAdded', null);
+        }
+    } catch (error) {
+        console.error('Error adding share button:', error);
+    }
+}
 
 /**
  * Share functionality for Word Scramble Game
@@ -102,8 +215,15 @@ function shareGame(method) {
     const shareText = `${gameDescription} Play it here: ${gameUrl}`;
     
     // Get current score if available
-    const scoreElement = document.getElementById('score');
-    const score = scoreElement ? ` My current score is ${scoreElement.textContent}!` : "";
+    let score = "";
+    if (window.GameState) {
+        const gameState = window.GameState.getState();
+        score = ` My current score is ${gameState.score}!`;
+    } else {
+        const scoreElement = document.getElementById('score');
+        score = scoreElement ? ` My current score is ${scoreElement.textContent}!` : "";
+    }
+    
     const scoreShareText = `${shareText}${score}`;
     
     // Handle different share methods
@@ -117,11 +237,20 @@ function shareGame(method) {
                     url: gameUrl
                 }).then(() => {
                     console.log('Shared successfully');
+                    // Publish share success event
+                    if (window.EventBus) {
+                        window.EventBus.publish('shareSuccess', { method: 'native' });
+                    }
                 }).catch((error) => {
                     console.error('Error sharing:', error);
                     // Fallback to opening share dropdown
                     const shareDropdown = document.querySelector('.share-dropdown');
                     if (shareDropdown) shareDropdown.classList.add('active');
+                    
+                    // Publish share error event
+                    if (window.EventBus) {
+                        window.EventBus.publish('shareError', { method: 'native', error: error.message });
+                    }
                 });
             }
             break;
@@ -131,6 +260,11 @@ function shareGame(method) {
             const emailSubject = encodeURIComponent(gameTitle);
             const emailBody = encodeURIComponent(scoreShareText);
             window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`);
+            
+            // Publish share event
+            if (window.EventBus) {
+                window.EventBus.publish('shareSuccess', { method: 'email' });
+            }
             break;
             
         case 'sms':
@@ -142,16 +276,31 @@ function shareGame(method) {
             } else {
                 window.open(`sms:?body=${smsBody}`);
             }
+            
+            // Publish share event
+            if (window.EventBus) {
+                window.EventBus.publish('shareSuccess', { method: 'sms' });
+            }
             break;
             
         case 'facebook':
             // Open Facebook share dialog
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}`);
+            
+            // Publish share event
+            if (window.EventBus) {
+                window.EventBus.publish('shareSuccess', { method: 'facebook' });
+            }
             break;
             
         case 'telegram':
             // Share via Telegram
             window.open(`https://t.me/share/url?url=${encodeURIComponent(gameUrl)}&text=${encodeURIComponent(gameDescription + score)}`);
+            
+            // Publish share event
+            if (window.EventBus) {
+                window.EventBus.publish('shareSuccess', { method: 'telegram' });
+            }
             break;
     }
     
