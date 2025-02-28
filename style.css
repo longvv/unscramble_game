@@ -47,10 +47,20 @@ h2 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.word-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
 .instruction {
     color: #576574;
     margin-bottom: 10px;
     font-size: 1.1rem;
+    margin: 0;
+    flex-grow: 1;
 }
 
 .scrambled-word {
@@ -235,6 +245,7 @@ h2 {
     font-size: 1.2rem;
     margin-bottom: 10px;
     color: #2d3436;
+    margin: 0;
 }
 
 button, .letter-tile {
@@ -955,7 +966,29 @@ button:hover {
     color: #ee5253;
 }
 
+/* Specific letter box and letter tile improvements for mobile */
 @media (max-width: 767px) {
+    h1 {
+        font-size: 1.8rem !important;
+        margin-bottom: 12px;
+    }
+    
+    .word-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .instruction {
+        margin: 0;
+        flex-grow: 1;
+    }
+    
+    .score-container {
+        margin: 0;
+    }
+
     .container {
         padding: 10px;
     }
@@ -973,10 +1006,7 @@ button:hover {
         font-size: 1rem;
         margin-bottom: 5px;
     }
-}
 
-/* Specific letter box and letter tile improvements for mobile */
-@media (max-width: 767px) {
     /* Smaller boxes and tiles with tighter spacing */
     .letter-box {
         width: 40px;   /* Reduced from 50px */
@@ -1036,10 +1066,19 @@ button:hover {
     .position-number {
         font-size: 16px;
     }
+
+    h1 {
+        font-size: 1.8rem !important;
+        margin-bottom: 12px;
+    }
 }
 
 /* Extra small devices (phones, 375px and down) */
 @media (max-width: 375px) {
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
     .position-number {
         font-size: 14px;
     }
@@ -1083,6 +1122,11 @@ button:hover {
 
 /* Responsive design */
 @media (max-width: 600px) {
+    h1 {
+        font-size: 1.8rem !important;
+        margin-bottom: 12px;
+    }
+
     .container {
         padding: 10px;
         width: 100%;

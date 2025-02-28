@@ -332,9 +332,8 @@ const GameController = (function() {
                 wordList: window.document.getElementById('word-items')
             });
             
-            // Load saved score
-            _gameState.score = window.StorageService.getScore();
-            _elements.scoreElement.textContent = _gameState.score;
+            // Reset or load score logic - IMPROVED VERSION
+            this._resetOrLoadScore();
             
             // Set up button listeners
             if (_elements.checkBtn) {
@@ -359,6 +358,92 @@ const GameController = (function() {
             loadNextWord();
             
             return this;
+        },
+
+        /**
+         * Modified _resetOrLoadScore method that always resets the score to zero
+         * This version will be used in game-controller.js
+         */
+        _resetOrLoadScore: function() {
+            try {
+                console.log('Always resetting score on game initialization');
+                
+                // Always reset score to 0 - removed session time check
+                _gameState.score = 0;
+                window.StorageService.saveScore(0);
+                
+                // Wait briefly for DOM to be fully ready
+                setTimeout(() => {
+                    // Find ALL score elements and update them
+                    const scoreSelectors = ['#score', '.score-container span'];
+                    
+                    // Try multiple selectors for more robustness
+                    scoreSelectors.forEach(selector => {
+                        const elements = document.querySelectorAll(selector);
+                        console.log(`Found ${elements.length} elements with selector ${selector}`);
+                        
+                        elements.forEach(el => {
+                            el.textContent = '0';
+                            console.log(`Updated score element with selector ${selector}`);
+                        });
+                    });
+                    
+                    // Also update the stored reference if available
+                    if (_elements && _elements.scoreElement) {
+                        _elements.scoreElement.textContent = '0';
+                    }
+                }, 50);
+                
+                // Still update session timestamp for other features that might need it
+                window.localStorage.setItem('gameLastSession', Date.now().toString());
+            } catch (error) {
+                console.error('Error in _resetOrLoadScore:', error);
+            }
+        },
+        
+        /**
+         * Method for manual score reset that can be called from UI
+         */
+        resetScore: function() {
+            try {
+                console.log('resetScore called');
+                
+                // Reset score in game state
+                _gameState.score = 0;
+                window.StorageService.saveScore(0);
+                
+                // Clear score in DOM using multiple approaches
+                console.log('Updating DOM score elements...');
+                
+                // Approach 1: Direct element reference
+                if (_elements && _elements.scoreElement) {
+                    _elements.scoreElement.textContent = '0';
+                    console.log('Updated score via _elements.scoreElement reference');
+                }
+                
+                // Approach 2: Query ID selector
+                const scoreById = document.querySelectorAll('#score');
+                console.log(`Found ${scoreById.length} elements with #score selector`);
+                
+                scoreById.forEach(el => {
+                    el.textContent = '0';
+                    console.log('Updated #score element');
+                });
+                
+                // Approach 3: Query class selector
+                const scoreByClass = document.querySelectorAll('.score-container span');
+                console.log(`Found ${scoreByClass.length} elements with .score-container span selector`);
+                
+                scoreByClass.forEach(el => {
+                    el.textContent = '0';
+                    console.log('Updated .score-container span element');
+                });
+                
+                return _gameState.score;
+            } catch (error) {
+                console.error('Error in resetScore:', error);
+                return 0;
+            }
         },
         
         /**

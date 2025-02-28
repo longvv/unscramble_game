@@ -39,9 +39,10 @@
         </div>
         
         <div class="game-area">
-            <div class="score-container">
+            <!-- Remove this first score-container -->
+            <!-- <div class="score-container">
                 <p>Score: <span id="score">0</span></p>
-            </div>
+            </div> -->
             
             <!-- Celebration element for animation -->
             <div id="celebration-element" class="celebration-element">
@@ -57,8 +58,12 @@
             
             <div class="word-container">
                 <p class="instruction">Unscramble this word:</p>
-                <div id="scrambled-word" class="scrambled-word"></div>
+                <div class="score-container">
+                    <p>Score: <span id="score">0</span></p>
+                </div>
             </div>
+            
+            <div id="scrambled-word" class="scrambled-word"></div>
             
             <div id="drop-area" class="drop-area">
                 <p>Drop letters here to form the word</p>
