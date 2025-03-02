@@ -6,85 +6,233 @@ sidebar_position: 2
 
 # Architecture Overview
 
-The Word Scramble Game uses a modular architecture based on the Module Pattern, with event-driven communication, centralized state management, and clearly separated responsibilities. Each module has a specific purpose and communicates with other modules through well-defined interfaces.
+The Word Scramble Game uses an event-driven modular architecture based on the Module Pattern, with centralized state management and clearly separated responsibilities. This architecture enables loose coupling between components while maintaining a predictable data flow.
+
+## Architecture Principles
+
+The application is built around several key architectural principles:
+
+1. **Event-Driven Communication**: Modules communicate through events rather than direct references
+2. **Centralized State Management**: All game state is managed in a single location
+3. **Module Encapsulation**: Each module has private state and exposes only necessary functionality
+4. **Separation of Concerns**: Modules have specific, focused responsibilities
+5. **Progressive Enhancement**: Core functionality works across devices with enhanced experiences where supported
+
+## Core Architecture Diagram
+
+```mermaid
+graph TD
+    EventBus[EventBus] <--> GameState[GameState]
+    EventBus <--> GameController[GameController]
+    EventBus <--> WordController[WordController]
+    EventBus <--> InputManager[InputManager]
+    EventBus <--> TouchDragManager[TouchDragManager]
+    
+    GameState --> UI[UI Components]
+    
+    GameController --> StorageService[StorageService]
+    GameController --> AudioService[AudioService]
+    
+    WordController --> WordManager[WordManager]
+    WordManager --> StorageService
+    
+    InputManager --> DragDropManager[DragDropManager]
+    TouchDragManager --> DragDropManager
+    
+    UIFactory[UIFactory] --> UI
+    
+    GameConfig[GameConfig] --> StorageService
+    GameConfig --> AudioService
+    GameConfig --> UIFactory
+    GameConfig --> WordManager
+    
+    Main[Main Module] --> EventBus
+    Main --> GameState
+    Main --> GameController
+    Main --> WordController
+    Main --> InputManager
+    Main --> TouchDragManager
+```
 
 ## Module Structure
 
 The game's codebase is organized into the following modules:
 
-1. **Config Module** (`config.js`): Central configuration hub with application-wide settings
-2. **EventBus Module** (`eventbus.js`): Event-based communication system for decoupled modules
-3. **GameState Module** (`gamestate.js`): Centralized state management with change notifications
-4. **Storage Module** (`storage.js`): Data persistence layer using localStorage
-5. **Audio Module** (`audio.js`): Sound management and playback
-6. **UI Factory** (`ui-factory.js`): Factory methods for UI element creation
-7. **Word Manager** (`word-manager.js`): Word list and image management
-8. **Word Controller** (`wordcontroller.js`): Word loading, scrambling, and hint functionality
-9. **Input Manager** (`inputmanager.js`): Unified mouse and touch input handling
-10. **Game Controller** (`game-controller.js`): Core game coordination and flow
-11. **Main** (`main.js`): Application entry point with module initialization
+### Core Infrastructure Modules
 
-## Architecture Diagram
+1. **EventBus Module** (`eventbus.js`): Central event system enabling decoupled component communication
+2. **GameState Module** (`gamestate.js`): State management with change notification
+3. **GameConfig Module** (`config.js`): Configuration settings and default values
+
+### Service Modules
+
+4. **StorageService Module** (`storage.js`): Data persistence using localStorage
+5. **AudioService Module** (`audio.js`): Sound management and playback
+
+### UI Modules
+
+6. **UIFactory Module** (`ui-factory.js`): Factory methods for UI component creation
+
+### Game Logic Modules
+
+7. **WordManager Module** (`word-manager.js`): Word list and image management
+8. **WordController Module** (`wordcontroller.js`): Word loading, scrambling, and hint functionality
+9. **GameController Module** (`game-controller.js`): Core game logic and coordination
+
+### Input Handling Modules
+
+10. **DragDropManager Module** (`drag-drop.js`): Basic drag and drop functionality
+11. **InputManager Module** (`inputmanager.js`): Unified mouse and touch input handling
+12. **TouchDragManager Module** (`touch-drag.js`): Enhanced touch input for mobile
+
+### System Module
+
+13. **Main Module** (`main.js`): Application entry point and initialization
+
+## System Initialization Flow
+
+The application initializes in a specific sequence to ensure dependencies are properly set up:
 
 ```mermaid
-graph TD
-    Main[Main] --> EventBus
-    Main --> GameController
+sequenceDiagram
+    participant DOM as DOM Content Loaded
+    participant Main as Main Module
+    participant EventBus as EventBus
+    participant GameState as GameState
+    participant Services as Services
+    participant Controllers as Controllers
+    participant UI as UI Components
     
-    EventBus[Event Bus] -.-> GameController
-    EventBus -.-> UIController
-    EventBus -.-> WordController
-    EventBus -.-> InputManager
-    
-    GameController[Game Controller] --> AudioService
-    GameController --> StorageService
-    GameController --> GameState
-    GameController --> UIController
-    GameController --> WordController
-    GameController --> InputManager
-    
-    UIController[UI Controller] --> UIFactory
-    UIController --> GameState
-    
-    WordController[Word Controller] --> StorageService
-    WordController --> UIFactory
-    WordController --> GameState
-    
-    InputManager[Input Manager] --> AudioService
-    InputManager --> GameState
-    
-    GameState[Game State]
-    AudioService[Audio Service] --> GameConfig
-    StorageService[Storage Service] --> GameConfig
-    UIFactory[UI Factory]
-    GameConfig[Config]
-    
-    classDef newModules fill:#f9f,stroke:#333,stroke-width:2px;
-    class EventBus,GameState,UIController,WordController,InputManager newModules;
+    DOM->>Main: DOMContentLoaded event
+    Main->>EventBus: Initialize EventBus
+    Main->>GameConfig: Initialize GameConfig
+    Main->>GameState: Initialize GameState
+    Main->>Services: Initialize Services
+        Services->>StorageService: Initialize
+        Services->>AudioService: Initialize
+    Main->>Controllers: Initialize Controllers
+        Controllers->>DragDropManager: Initialize
+        Controllers->>InputManager: Initialize
+        Controllers->>TouchDragManager: Initialize
+        Controllers->>WordManager: Initialize
+        Controllers->>WordController: Initialize
+    Main->>GameController: Initialize Game Controller
+    GameController->>WordController: Load First Word
+    WordController->>UI: Display Word and UI
 ```
 
-*Dotted lines represent event-based communication through the EventBus.*
+This initialization sequence ensures that fundamental services like EventBus and GameState are available before modules that depend on them.
 
-## Key Architectural Patterns
+## Event-Driven Communication
 
-### Module Pattern
-Each JavaScript file uses the Module Pattern to encapsulate private state and expose only necessary functionality:
+The EventBus is the central communication mechanism in the application. Modules publish events without knowing which modules will receive them, and subscribe to events they're interested in.
+
+```mermaid
+flowchart TD
+    Publisher[Publisher Module] -->|publish event| EventBus
+    EventBus -->|notify| Subscriber1[Subscriber Module 1]
+    EventBus -->|notify| Subscriber2[Subscriber Module 2]
+    EventBus -->|notify| Subscriber3[Subscriber Module 3]
+```
+
+Example of event communication:
+
+```javascript
+// Module A publishes an event
+EventBus.publish('wordLoaded', { word: 'apple', scrambled: 'pplae' });
+
+// Module B subscribes to the event
+EventBus.subscribe('wordLoaded', function(data) {
+    console.log('Word loaded:', data.word);
+    displayScrambledWord(data.scrambled);
+});
+```
+
+This event-driven approach allows modules to be developed, tested, and modified independently.
+
+## State Management Flow
+
+The GameState module provides centralized state management with change notifications:
+
+```mermaid
+flowchart TD
+    Component[Game Component] -->|update state| GameState
+    GameState -->|detect changes| GameState
+    GameState -->|publish stateChanged event| EventBus
+    EventBus -->|notify| Subscriber1[UI Component 1]
+    EventBus -->|notify| Subscriber2[UI Component 2]
+    EventBus -->|notify| Subscriber3[Logic Component]
+```
+
+Example of state management:
+
+```javascript
+// Update game state
+GameState.update({
+    score: GameState.get('score') + 10,
+    hintUsed: false
+});
+
+// Component reacts to state changes
+EventBus.subscribe('stateChanged', function(data) {
+    if (data.changes.score) {
+        updateScoreDisplay(data.changes.score.newValue);
+    }
+});
+```
+
+## Game Flow Diagram
+
+The core gameplay flow follows this sequence:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialize
+    Initialize --> LoadWord
+    LoadWord --> WaitForInput
+    WaitForInput --> CheckAnswer: Player completes word
+    CheckAnswer --> Celebration: Correct Answer
+    CheckAnswer --> WaitForInput: Incorrect Answer
+    Celebration --> LoadWord: Next Word
+    WaitForInput --> ShowHint: Player requests hint
+    ShowHint --> WaitForInput
+```
+
+## Input Handling Architecture
+
+The input system handles both mouse and touch interactions:
+
+```mermaid
+flowchart TD
+    User[User] -->|interacts| Browser[Browser Events]
+    Browser -->|mouse events| InputManager
+    Browser -->|touch events| TouchDragManager
+    InputManager -->|normalized events| DragDropManager
+    TouchDragManager -->|normalized events| DragDropManager
+    DragDropManager -->|publishes events| EventBus
+    EventBus -->|notifies| GameController
+```
+
+This input abstraction ensures consistent behavior across different devices and input methods.
+
+## Module Implementation Pattern
+
+Each module follows the Module Pattern for encapsulation:
 
 ```javascript
 const ModuleName = (function() {
     // Private variables and functions
-    let _privateVar = 'value';
+    let _privateState = {};
     
-    function _privateMethod() {
+    function _privateFunction() {
         // Implementation
     }
     
     // Public API
     return {
         publicMethod: function() {
-            // Uses private variables and methods
-            _privateMethod();
-            return _privateVar;
+            _privateFunction();
+            return _privateState;
         }
     };
 })();
@@ -93,39 +241,32 @@ const ModuleName = (function() {
 window.ModuleName = ModuleName;
 ```
 
-### Event-Based Communication
-The EventBus enables modules to communicate without direct references, reducing coupling:
+This pattern provides several benefits:
+- Encapsulation of internal state and logic
+- Clear public API boundaries
+- Prevention of global namespace pollution
+- Controlled access to module functionality
+
+## Key Architecture Patterns
+
+### Publisher-Subscriber (Observer) Pattern
+
+The EventBus implements this pattern, allowing modules to subscribe to events and be notified when they occur:
 
 ```javascript
-// Publishing an event
+// Module A subscribes to an event
+EventBus.subscribe('wordLoaded', wordLoadedHandler);
+
+// Module B publishes the event
 EventBus.publish('wordLoaded', { word: 'apple' });
-
-// Subscribing to an event
-EventBus.subscribe('wordLoaded', function(data) {
-    console.log('Word loaded:', data.word);
-});
-```
-
-### Centralized State Management
-The GameState module provides a single source of truth for application state:
-
-```javascript
-// Updating state
-GameState.update({
-    score: 10,
-    currentWord: 'apple'
-});
-
-// Getting state
-const state = GameState.getState();
-console.log(state.score); // 10
 ```
 
 ### Factory Pattern
-The UIFactory creates consistent UI elements with proper event handlers:
+
+The UIFactory creates UI elements with consistent styling and behavior:
 
 ```javascript
-// Creating a letter tile
+// Creating a letter tile with the factory
 const tile = UIFactory.createLetterTile(
     'A',
     dragStartCallback,
@@ -134,134 +275,100 @@ const tile = UIFactory.createLetterTile(
 ```
 
 ### Repository Pattern
-The StorageService abstracts data storage operations:
+
+The StorageService provides a clean interface for data persistence:
 
 ```javascript
-// Saving data
+// Save data
 StorageService.saveWords(['apple', 'banana']);
 
-// Loading data
+// Retrieve data
 const words = StorageService.getWords();
 ```
 
-## SOLID Principles Applied
+### Facade Pattern
 
-The architecture follows SOLID principles:
+The GameController provides a simplified interface to the complex subsystems:
 
-### Single Responsibility
-Each module has a single, well-defined responsibility:
-- **EventBus**: Communication between modules
-- **GameState**: State management
-- **WordController**: Word-related operations
-- **InputManager**: Input handling
+```javascript
+// GameController hides the complexity
+GameController.init();
+```
 
-### Open-Closed
-Modules are open for extension but closed for modification. New functionality can be added by:
-- Creating new event subscribers
-- Extending existing modules with new public methods
-- Adding new controllers for specialized functionality
+## Cross-Device Compatibility
 
-### Liskov Substitution
-Interface consistency is maintained throughout the codebase, allowing components to be replaced without affecting the system.
+The architecture handles different device capabilities through progressive enhancement:
 
-### Interface Segregation
-Modules expose focused interfaces specific to their responsibilities rather than large, generic interfaces.
+- **Basic Support**: Core drag-and-drop using standard HTML5 API
+- **Enhanced Mobile**: Touch-specific optimizations with TouchDragManager
+- **Fallback Mechanisms**: Graceful degradation when features aren't available
 
-### Dependency Inversion
-High-level modules depend on abstractions rather than concrete implementations:
-- GameController depends on events and state updates rather than implementation details
-- Controllers use abstractions provided by services
+## SOLID Principles Application
+
+The architecture applies SOLID principles:
+
+1. **Single Responsibility**: Each module has one specific responsibility
+2. **Open/Closed**: Modules are extended through events without modifying code
+3. **Liskov Substitution**: Input handlers can be substituted without affecting behavior
+4. **Interface Segregation**: Modules expose minimal necessary interfaces
+5. **Dependency Inversion**: High-level modules depend on abstractions (events)
 
 ## Extension Points
 
-The architecture is designed to be easily extendable:
+The architecture provides several extension points:
 
 ### Adding New Game Modes
-Create a specialized controller that uses existing modules:
 
 ```javascript
+// Create a new controller module
 const TimeAttackController = (function() {
-    // Private state
-    let _timeRemaining = 60;
-    
-    // Subscribe to events
-    EventBus.subscribe('wordLoaded', function() {
-        _resetTimer();
-    });
-    
-    // Public API
-    return {
-        init: function() {
-            // Initialize timer UI
-            // Start timer
-            return this;
-        },
-        
-        _resetTimer: function() {
-            _timeRemaining = 60;
-            // Update timer display
-        }
-    };
+    // Implementation
 })();
+
+// Subscribe to events
+EventBus.subscribe('wordLoaded', function() {
+    // Time attack logic
+});
 ```
 
 ### Adding New UI Components
-Extend the UIFactory with new component creation methods:
 
 ```javascript
-// Add new method to UIFactory
+// Add to UIFactory
 UIFactory.createTimerDisplay = function(seconds) {
-    const timerDisplay = document.createElement('div');
-    timerDisplay.className = 'timer-display';
-    timerDisplay.textContent = `Time: ${seconds}s`;
-    return timerDisplay;
+    // Create timer display
 };
 ```
 
-### Implementing Custom Storage
-Modify the StorageService to use a different storage mechanism:
+### Adding New Events
 
 ```javascript
-// Example using IndexedDB instead of localStorage
-function _storeInIndexedDB(key, value) {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('WordScrambleDB', 1);
-        // IndexedDB implementation
-    });
-}
+// Define new events
+EventBus.publish('timeRunningLow', { timeRemaining: 10 });
+
+// Subscribe to new events
+EventBus.subscribe('timeRunningLow', function(data) {
+    // Handle time running low
+});
 ```
 
-## Event Flow
+## Performance Considerations
 
-The game uses events for many key interactions. Here's a simplified event flow diagram:
+The architecture includes these performance optimizations:
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant InputManager
-    participant EventBus
-    participant WordController
-    participant GameController
-    participant GameState
-    
-    User->>InputManager: Drags letter
-    InputManager->>EventBus: publish('dragStart')
-    
-    User->>InputManager: Drops letter
-    InputManager->>EventBus: publish('allLettersPlaced')
-    EventBus->>GameController: Notify subscribers
-    GameController->>EventBus: publish('answerCorrect')
-    EventBus->>GameState: Notify subscribers
-    GameState->>EventBus: publish('stateChanged')
-    
-    User->>WordController: Clicks "Next Word"
-    WordController->>EventBus: publish('wordLoaded')
-    EventBus->>GameState: Notify subscribers
-    GameState->>EventBus: publish('stateChanged')
-```
+1. **Event Batching**: State changes are batched and published together
+2. **Lazy Initialization**: Components initialize only when needed
+3. **DOM Caching**: UI elements are cached to minimize DOM lookups
+4. **Touch Event Optimization**: Touch events are throttled on mobile
+
+## Security Considerations
+
+The architecture includes these security measures:
+
+1. **Data Validation**: Input is validated before processing
+2. **Content Security**: Only uses trusted content sources
+3. **Storage Protection**: Sensitive data is not stored
 
 ## Conclusion
 
-The Word Scramble Game architecture follows best practices for modular, maintainable JavaScript applications. By using the Module Pattern, event-driven communication, and centralized state management, the architecture achieves good separation of concerns and extensibility.
-
-The modules are designed with clear responsibilities and interfaces, allowing for easy modification and extension. The use of design patterns and SOLID principles makes the code more robust and maintainable.
+The Word Scramble Game architecture provides a flexible, maintainable foundation through its event-driven approach, centralized state management, and module encapsulation. This enables features to be developed independently while ensuring a consistent, stable experience across different devices.

@@ -28,14 +28,21 @@ This developer guide provides instructions for developers who want to extend or 
 word-scramble-game/
 ├── index.html          # Main HTML file
 ├── style.css           # Styles for the game
+├── manifest.json       # Progressive Web App manifest
 ├── js/                 # JavaScript modules
 │   ├── config.js       # Game configuration
+│   ├── eventbus.js     # Event communication system
+│   ├── gamestate.js    # Centralized state management
 │   ├── storage.js      # Data persistence
 │   ├── audio.js        # Sound management
 │   ├── ui-factory.js   # UI component creation
 │   ├── word-manager.js # Word management
+│   ├── wordcontroller.js # Word logic and control
 │   ├── drag-drop.js    # Drag and drop functionality
+│   ├── inputmanager.js # Unified input handling
+│   ├── touch-drag.js   # Enhanced touch support
 │   ├── game-controller.js # Main game logic
+│   ├── service-worker.js # PWA service worker
 │   └── main.js         # Entry point
 ├── docs/               # Documentation
 └── README.md           # Project overview
@@ -46,15 +53,111 @@ word-scramble-game/
 The game follows a modular architecture with the following main components:
 
 1. **Config Module** - Centralized configuration
-2. **Storage Module** - Data persistence
-3. **Audio Module** - Sound management
-4. **UI Factory** - UI component creation
-5. **Word Manager** - Word list management
-6. **Drag-Drop Manager** - Drag and drop functionality
-7. **Game Controller** - Core game logic
-8. **Main** - Application entry point
+2. **EventBus Module** - Communication between modules
+3. **GameState Module** - Centralized state management
+4. **Storage Module** - Data persistence
+5. **Audio Module** - Sound management
+6. **UI Factory** - UI component creation
+7. **Word Manager** - Word list management
+8. **WordController** - Word loading and scrambling
+9. **Drag-Drop Manager** - Drag and drop functionality
+10. **InputManager** - Unified input handling
+11. **TouchDragManager** - Enhanced touch support
+12. **Game Controller** - Core game logic
+13. **Main** - Application entry point
 
 For a detailed explanation of the architecture, see the [Architecture Overview](architecture).
+
+## Module Explanations
+
+### EventBus Module
+
+The EventBus provides a central communication system that allows modules to interact without direct dependencies. This publish-subscribe pattern improves code maintainability by decoupling components.
+
+Key methods:
+- `subscribe(eventName, callback)` - Listen for a specific event
+- `publish(eventName, data)` - Broadcast an event with optional data
+- `unsubscribe(eventName, callback)` - Stop listening for an event
+
+Usage example:
+```javascript
+// Subscribe to an event
+EventBus.subscribe('wordLoaded', function(data) {
+    console.log('New word loaded:', data.word);
+});
+
+// Publish an event
+EventBus.publish('wordLoaded', { word: 'apple', scrambled: 'plepa' });
+```
+
+### GameState Module
+
+The GameState module provides centralized state management with a single source of truth for the application's state. It notifies subscribers when state changes occur.
+
+Key methods:
+- `getState()` - Get the current game state
+- `get(property)` - Get a specific state property
+- `update(newValues)` - Update state with new values
+- `resetState()` - Reset state to initial values
+
+Usage example:
+```javascript
+// Update state
+GameState.update({
+    score: GameState.get('score') + 10,
+    hintUsed: false
+});
+
+// Get full state
+const state = GameState.getState();
+console.log('Current word:', state.currentWord);
+```
+
+### InputManager Module
+
+The InputManager provides a unified interface for handling both mouse and touch input, making the game accessible on various devices.
+
+Key features:
+- Handles both mouse and touch events
+- Provides consistent drag and drop behavior across devices
+- Detects device capabilities and adjusts accordingly
+
+Usage example:
+```javascript
+// Initialize input manager
+InputManager.init();
+
+// Check if the device supports touch
+const isTouchDevice = InputManager.isTouchDevice();
+```
+
+## Game Flow
+
+The game flow follows these main steps:
+
+1. **Initialization**:
+   - Main module initializes all components
+   - EventBus and GameState are initialized first
+   - Services and controllers are initialized next
+   - Game Controller coordinates the game flow
+
+2. **Word Loading**:
+   - WordController selects a random word
+   - Word is scrambled and displayed
+   - Word image is loaded and displayed
+   - Letter boxes are created for the answer
+
+3. **Gameplay**:
+   - User drags letters to the drop area
+   - InputManager handles drag and drop interactions
+   - GameController checks the answer when all letters are placed
+   - Correct answers trigger celebration and update score
+   - Wrong answers provide feedback for the user
+
+4. **Word List Management**:
+   - User can add custom words and images
+   - WordManager handles word list operations
+   - StorageService saves changes to localStorage
 
 ## Extending the Game
 
@@ -68,8 +171,8 @@ To add a new game mode:
 
 1. Create a new controller module (similar to `game-controller.js`)
 2. Implement the game logic for your new mode
-3. Update the UI to allow switching between game modes
-4. Use the existing modules for common functionality
+3. Subscribe to relevant events using EventBus
+4. Update the UI to allow switching between game modes
 
 Example:
 ```javascript
@@ -79,10 +182,19 @@ const TimeAttackController = (function() {
     let _timeRemaining = 60; // 60 seconds
     let _timer = null;
     
-    // Reuse existing game controller functionality
-    const _baseController = Object.create(GameController);
+    // Set up event subscriptions
+    function _setupEventSubscriptions() {
+        EventBus.subscribe('wordLoaded', function() {
+            _resetTimer();
+        });
+        
+        EventBus.subscribe('answerCorrect', function() {
+            // Add bonus time
+            _timeRemaining += 5;
+            _updateTimerDisplay();
+        });
+    }
     
-    // Override and extend methods as needed
     function _startTimer() {
         _timer = setInterval(() => {
             _timeRemaining--;
@@ -94,24 +206,53 @@ const TimeAttackController = (function() {
         }, 1000);
     }
     
-    // Public API - extend the base controller
-    return Object.assign(_baseController, {
+    function _updateTimerDisplay() {
+        const timerElement = document.getElementById('timer-display');
+        if (timerElement) {
+            timerElement.textContent = `Time: ${_timeRemaining}s`;
+        }
+    }
+    
+    function _endGame() {
+        clearInterval(_timer);
+        EventBus.publish('gameOver', {
+            score: GameState.get('score')
+        });
+    }
+    
+    // Public API
+    return {
         init: function() {
-            // Initialize base functionality
-            _baseController.init.call(this);
+            // Create timer UI
+            const gameArea = document.querySelector('.game-area');
+            const timerDisplay = document.createElement('div');
+            timerDisplay.id = 'timer-display';
+            timerDisplay.className = 'timer-display';
+            timerDisplay.textContent = `Time: ${_timeRemaining}s`;
+            gameArea.insertBefore(timerDisplay, gameArea.firstChild);
             
-            // Add time attack specific functionality
+            // Set up event subscriptions
+            _setupEventSubscriptions();
+            
+            // Start timer
             _startTimer();
             
             return this;
         },
         
-        // Add new methods specific to time attack
-        resetTimer: function() {
+        reset: function() {
             _timeRemaining = 60;
             _updateTimerDisplay();
+            
+            if (_timer) {
+                clearInterval(_timer);
+            }
+            
+            _startTimer();
+            
+            return this;
         }
-    });
+    };
 })();
 ```
 
@@ -129,6 +270,16 @@ UIFactory.createTimerDisplay = function(seconds) {
     const timerDisplay = document.createElement('div');
     timerDisplay.className = 'timer-display';
     timerDisplay.textContent = `Time: ${seconds}s`;
+    
+    // Add styling
+    timerDisplay.style.fontSize = '1.2rem';
+    timerDisplay.style.fontWeight = 'bold';
+    timerDisplay.style.color = '#5f27cd';
+    timerDisplay.style.padding = '10px';
+    timerDisplay.style.borderRadius = '5px';
+    timerDisplay.style.backgroundColor = 'rgba(95, 39, 205, 0.1)';
+    timerDisplay.style.marginBottom = '10px';
+    
     return timerDisplay;
 };
 ```
@@ -141,10 +292,12 @@ To add new sound effects:
 2. Update the `AudioService` module to include the new sounds
 
 Example:
-```javascript
-// Add to index.html
+```html
+<!-- Add to index.html -->
 <audio id="timer-tick" src="sounds/tick.mp3" preload="auto"></audio>
+```
 
+```javascript
 // Update AudioService init method
 init: function() {
     // Initialize audio elements
@@ -158,6 +311,41 @@ init: function() {
     // ... rest of initialization ...
     
     return this;
+}
+```
+
+### Implementing New Events
+
+To add new events to the EventBus:
+
+1. Choose descriptive event names that follow the existing naming convention
+2. Subscribe to the events in the appropriate modules
+3. Publish events with relevant data
+
+Example:
+```javascript
+// Subscribe to a new event
+EventBus.subscribe('timeRunningLow', function(data) {
+    // Flash the timer display when time is running low
+    const timerDisplay = document.getElementById('timer-display');
+    if (timerDisplay) {
+        timerDisplay.classList.add('warning');
+    }
+    
+    // Play warning sound
+    AudioService.playSound('tick');
+});
+
+// Publish the event when appropriate
+function _updateTimer() {
+    _timeRemaining--;
+    
+    // Notify when time is running low
+    if (_timeRemaining <= 10) {
+        EventBus.publish('timeRunningLow', {
+            timeRemaining: _timeRemaining
+        });
+    }
 }
 ```
 
@@ -218,16 +406,46 @@ const StorageService = (function() {
 })();
 ```
 
+## Mobile-Specific Considerations
+
+The game supports mobile devices with touch interfaces through:
+
+1. **InputManager**: Provides a unified API for mouse and touch events
+2. **TouchDragManager**: Enhances touch support for better mobile experience
+3. **Responsive Design**: CSS adjustments for different screen sizes
+
+When extending the game for mobile, consider:
+
+- Touch target sizes (buttons and draggable elements should be at least 44x44px)
+- Touch event handling (use both mouse and touch events)
+- Screen orientation changes
+- Performance optimizations for mobile devices
+
+## Progressive Web App Support
+
+The game includes basic Progressive Web App (PWA) support through:
+
+1. **manifest.json**: Defines app metadata and icons
+2. **service-worker.js**: Provides offline access and caching
+
+To enhance PWA support:
+
+1. Update `manifest.json` with your app's information
+2. Modify `service-worker.js` to cache your additional resources
+3. Add more app icons in different sizes
+
 ## Best Practices
 
 When extending or modifying the Word Scramble Game, follow these best practices:
 
 1. **Maintain Modularity**: Keep each module focused on a single responsibility
 2. **Use the Module Pattern**: Follow the existing pattern for encapsulation
-3. **Error Handling**: Implement robust error handling for all operations
-4. **Documentation**: Add JSDoc comments for all new functions
-5. **Consistent Naming**: Follow the existing naming conventions
-6. **Testing**: Test your changes thoroughly, especially for edge cases
+3. **Use the EventBus**: Communicate between modules using events
+4. **Update GameState**: Use the central state manager for game state
+5. **Error Handling**: Implement robust error handling for all operations
+6. **Documentation**: Add JSDoc comments for all new functions
+7. **Consistent Naming**: Follow the existing naming conventions
+8. **Testing**: Test your changes thoroughly, especially for edge cases
 
 ## Common Extension Points
 
@@ -291,76 +509,44 @@ const _config = {
 
 ## Debugging Tips
 
-1. **Console Logging**: Use `console.log()` statements to debug state changes
-2. **Browser DevTools**: Use the browser's developer tools to inspect elements, network requests, and localStorage
-3. **Module Isolation**: Test modules in isolation to identify issues
-4. **Error Tracking**: Monitor the console for errors and warnings
+1. **Event Debugging**: Use the browser console to log events
+   ```javascript
+   // Add this to debug events
+   EventBus.subscribe('*', function(eventName, data) {
+       console.log(`Event: ${eventName}`, data);
+   });
+   ```
 
-## Contributing
+2. **State Debugging**: Monitor state changes
+   ```javascript
+   // Add this to debug state changes
+   EventBus.subscribe('stateChanged', function(data) {
+       console.log('State changed:', data.changes);
+   });
+   ```
 
-If you want to contribute to the project:
+3. **Browser DevTools**: Use the browser's developer tools to:
+   - Inspect elements and CSS
+   - Set breakpoints in JavaScript
+   - Monitor localStorage operations
+   - Check for errors in the console
 
-1. Make sure your code follows the existing patterns and practices
-2. Test your changes thoroughly
-3. Document your changes in the appropriate documentation files
-4. Submit a pull request or patch with a clear description of the changes
+4. **Module Isolation**: Test modules in isolation
+   ```javascript
+   // Example: Test WordController in isolation
+   WordController.getScrambledWord('testing'); // Should return a scrambled version
+   ```
 
-## Completed Tasks
+## Performance Considerations
 
-1. **Identified Missing Documentation Files**:
-   - Created `developer-guide.md` with comprehensive guidance for developers who want to extend the game
-   - Created `modules/main.md` to document the main.js entry point module
-
-2. **Updated Documentation Structure**:
-   - Confirmed the correct structure for documentation files
-   - Updated `sidebars.js` to include the new files
-   - Verified the structure matches the Docusaurus configuration
-
-3. **Enhanced Content**:
-   - Updated `intro.md` with more comprehensive information
-   - Ensured each module's documentation is consistent and up-to-date
-   - Added diagrams and explanatory content where appropriate
-
-4. **Created Organization Guidelines**:
-   - Provided a file organization guide for proper documentation setup
-   - Included testing and verification steps
-
-## Consistency Check Results
-
-The documentation is now aligned with the latest codebase:
-- All modules in the codebase have corresponding documentation
-- The architecture documentation accurately reflects the current design
-- Code examples match the actual implementation patterns
-- Diagrams represent the current system architecture
-
-## Next Steps
-
-1. **Move Files to Correct Locations**:
-   - Ensure all module documentation is in the `docs/modules/` directory
-   - Keep main documentation files in the `docs/` root
-
-2. **Test the Documentation**:
-   - Run the Docusaurus development server
-   - Verify all links, navigation, and content display
-   - Test responsive behavior
-
-3. **Add Missing Screenshots or Graphics**:
-   - Consider adding screenshots of the game in action to the user guide
-   - Add more diagrams to illustrate complex concepts
-
-4. **Review and Edit Content**:
-   - Proofread all content for errors
-   - Ensure consistency in tone and terminology across documents
-   - Verify that all code samples are correct and properly formatted
-
-5. **Build and Deploy**:
-   - Build the documentation site for production
-   - Deploy to your hosting platform
+1. **Event Handling**: Avoid excessive event publishing/subscribing
+2. **DOM Manipulation**: Minimize direct DOM manipulation
+3. **Mobile Performance**: Optimize touch event handling
+4. **Image Optimization**: Use appropriately sized images
+5. **Audio Handling**: Preload audio files and handle errors
 
 ## Conclusion
 
-The Word Scramble Game is designed to be extensible and maintainable. By following the modular architecture and these guidelines, you can easily add new features or modify existing ones without introducing bugs or technical debt.
+This developer guide provides a comprehensive overview of the Word Scramble Game architecture and how to extend it. By following the patterns and practices outlined here, you can add new features and functionality while maintaining the game's modular structure and code quality.
 
 For more detailed information about specific modules, refer to the module documentation in the "Modules" section.
-
-The documentation is now complete and properly structured. All modules are documented, and the necessary guides for both users and developers are in place. With the steps outlined above, you can finalize the documentation site and make it available to users and contributors.
