@@ -8,6 +8,7 @@ const urlsToCache = [
     '/icon-512x512.png',
     '/js/main.js',
     '/js/config.js',
+    '/js/database.js', 
     '/js/audio.js',
     '/js/drag-drop.js',
     '/js/game-controller.js',
