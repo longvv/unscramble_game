@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Loading Word Scramble Game</h2>
+            <p>Initializing database...</p>
+        </div>
+    </div>
+
     <div class="container">
         <h1>Word Scramble Game</h1>
         
@@ -135,6 +143,7 @@
     <script src="js/config.js"></script>
     <script src="js/eventbus.js"></script>
     <script src="js/gamestate.js"></script>
+    <script src="js/database.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/ui-factory.js"></script>

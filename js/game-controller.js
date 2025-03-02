@@ -1,8 +1,8 @@
 /**
  * Game Controller Module for Word Scramble Game
  * Orchestrates game flow and coordinates between other modules
- * - Now refactored to use EventBus and GameState
- * - Reduced responsibilities with other controllers handling specific domains
+ * - Updated to use DatabaseService for score persistence
+ * - Maintains compatibility with StorageService as fallback
  */
 const GameController = (function() {
     // Private state is minimized since GameState now manages state
@@ -11,9 +11,62 @@ const GameController = (function() {
     // Private methods
     
     /**
+     * Save score to persistent storage
+     * @param {number} score - Score to save
+     * @returns {Promise<boolean>} Success status
+     */
+    async function _saveScore(score) {
+        try {
+            // Try to save score to database first
+            if (window.DatabaseService && 
+                typeof window.DatabaseService.saveScore === 'function' &&
+                window.DatabaseService.isInitialized()) {
+                await window.DatabaseService.saveScore(score);
+                return true;
+            }
+            
+            // Fallback to StorageService
+            if (window.StorageService && typeof window.StorageService.saveScore === 'function') {
+                window.StorageService.saveScore(score);
+                return true;
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('Error saving score:', error);
+            return false;
+        }
+    }
+    
+    /**
+     * Load score from persistent storage
+     * @returns {Promise<number>} The loaded score
+     */
+    async function _loadScore() {
+        try {
+            // Try to load score from database first
+            if (window.DatabaseService && 
+                typeof window.DatabaseService.getScore === 'function' &&
+                window.DatabaseService.isInitialized()) {
+                return await window.DatabaseService.getScore();
+            }
+            
+            // Fallback to StorageService
+            if (window.StorageService && typeof window.StorageService.getScore === 'function') {
+                return window.StorageService.getScore();
+            }
+            
+            return 0;
+        } catch (error) {
+            console.error('Error loading score:', error);
+            return 0;
+        }
+    }
+    
+    /**
      * Check if the answer is correct
      */
-    function _checkAnswer() {
+    async function _checkAnswer() {
         // Get current game state
         const gameState = window.GameState.getState();
         
@@ -45,7 +98,7 @@ const GameController = (function() {
             });
             
             // Save score to storage
-            window.StorageService.saveScore(newScore);
+            await _saveScore(newScore);
             
             // Disable check button and highlight boxes as correct
             const checkBtn = document.getElementById('check-btn');
@@ -162,7 +215,7 @@ const GameController = (function() {
          * Initialize the game
          * @returns {Object} GameController for chaining
          */
-        init: function() {
+        init: async function() {
             // Prevent multiple initializations
             if (_initialized) {
                 console.warn('Game Controller already initialized');
@@ -184,6 +237,20 @@ const GameController = (function() {
             }
             
             try {
+                // Load saved score
+                const savedScore = await _loadScore();
+                
+                // Initialize game state with saved score
+                window.GameState.update({
+                    score: savedScore
+                });
+                
+                // Update score display
+                const scoreElement = document.getElementById('score');
+                if (scoreElement) {
+                    scoreElement.textContent = savedScore;
+                }
+                
                 // Initialize services and controllers
                 if (window.AudioService) window.AudioService.init();
                 if (window.InputManager) window.InputManager.init();
@@ -224,11 +291,14 @@ const GameController = (function() {
          * Reset the game
          * @returns {Object} GameController for chaining
          */
-        reset: function() {
+        reset: async function() {
             // Reset game state
             if (window.GameState) {
                 window.GameState.resetState();
             }
+            
+            // Reset score in storage
+            await _saveScore(0);
             
             // Load first word
             if (window.WordController) {

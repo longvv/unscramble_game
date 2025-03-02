@@ -1,6 +1,7 @@
 /**
  * Improved WordController Module for Word Scramble Game
  * Handles word management, loading, and scrambling with improved letter box creation
+ * Updated to use DatabaseService instead of StorageService
  */
 const WordController = (function() {
     // Private state
@@ -144,7 +145,7 @@ const WordController = (function() {
     
     /**
      * Load the next word
-     * @returns {boolean} Success status
+     * @returns {Promise<boolean>} Success status
      */
     async function _loadNextWord() {
         try {
@@ -163,12 +164,33 @@ const WordController = (function() {
             
             let availableWords = gameState.availableWords || [];
             
-            // If no words available, get words from Word Manager
+            // If no words available, get words from database
             if (availableWords.length === 0) {
-                if (window.WordManager && typeof window.WordManager.getWords === 'function') {
-                    availableWords = window.WordManager.getWords();
-                } else {
-                    console.warn('WordManager not properly initialized, using fallback words');
+                // First try to get words from database
+                if (window.DatabaseService && typeof window.DatabaseService.getWords === 'function' && 
+                    window.DatabaseService.isInitialized()) {
+                    try {
+                        availableWords = await window.DatabaseService.getWords();
+                        console.log(`Loaded ${availableWords.length} words from database`);
+                    } catch (error) {
+                        console.error('Error loading words from database:', error);
+                    }
+                }
+                
+                // Fallback to WordManager if needed
+                if (!availableWords || availableWords.length === 0) {
+                    if (window.WordManager && typeof window.WordManager.getWords === 'function') {
+                        availableWords = window.WordManager.getWords();
+                        console.log(`Loaded ${availableWords.length} words from WordManager`);
+                    }
+                }
+                
+                // Fallback to legacy StorageService if needed
+                if (!availableWords || availableWords.length === 0) {
+                    if (window.StorageService && typeof window.StorageService.getWords === 'function') {
+                        availableWords = window.StorageService.getWords();
+                        console.log(`Loaded ${availableWords.length} words from StorageService`);
+                    }
                 }
                 
                 // Fallback to default words if still no words available
@@ -182,7 +204,7 @@ const WordController = (function() {
                             'flower', 'garden', 'house', 'ice', 'jungle'
                         ];
                     }
-                    console.log('Using fallback words');
+                    console.log('Using fallback default words');
                 }
                 
                 // Update available words in state
@@ -199,11 +221,12 @@ const WordController = (function() {
             const updatedWords = [...availableWords];
             updatedWords.splice(randomIndex, 1);
             
-            // Get image URL for word
+            // Get image URL for word - try each possible source in order
             let currentImageUrl = null;
 
-            // First try to get the image from DatabaseService (preferred)
-            if (window.DatabaseService && typeof window.DatabaseService.getWordImages === 'function') {
+            // 1. First try to get the image from DatabaseService (preferred)
+            if (window.DatabaseService && typeof window.DatabaseService.getWordImages === 'function'
+                && window.DatabaseService.isInitialized()) {
                 try {
                     const dbWordImages = await window.DatabaseService.getWordImages();
                     currentImageUrl = dbWordImages[currentWord.toLowerCase()];
@@ -212,15 +235,23 @@ const WordController = (function() {
                 }
             }
             
-            // If no image from DatabaseService, try WordManager
+            // 2. If no image from DatabaseService, try WordManager
             if (!currentImageUrl && window.WordManager && typeof window.WordManager.getWordImage === 'function') {
                 currentImageUrl = window.WordManager.getWordImage(currentWord);
             } 
             
-            // If still no image, try legacy StorageService
+            // 3. If still no image, try legacy StorageService
             if (!currentImageUrl && window.StorageService && typeof window.StorageService.getWordImages === 'function') {
                 const wordImages = window.StorageService.getWordImages();
                 currentImageUrl = wordImages[currentWord.toLowerCase()];
+            }
+            
+            // 4. If still no image, check GameConfig default word images
+            if (!currentImageUrl && window.GameConfig && typeof window.GameConfig.get === 'function') {
+                const defaultImages = window.GameConfig.get('defaultWordImages');
+                if (defaultImages && defaultImages[currentWord.toLowerCase()]) {
+                    currentImageUrl = defaultImages[currentWord.toLowerCase()];
+                }
             }
             
             // Scramble the word
@@ -416,6 +447,12 @@ const WordController = (function() {
                         _displayScrambledWord(data.changes.scrambledWord.newValue);
                     }
                 });
+                
+                // Subscribe to database initialization complete
+                window.EventBus.subscribe('databaseInitialized', () => {
+                    console.log('Database initialized, refreshing word data');
+                    this.loadNextWord();
+                });
             } else {
                 console.warn('EventBus not available, button events will not work');
             }
@@ -425,7 +462,7 @@ const WordController = (function() {
         
         /**
          * Load next word (exposed for external access)
-         * @returns {boolean} Success status
+         * @returns {Promise<boolean>} Success status
          */
         loadNextWord: function() {
             return _loadNextWord();
@@ -450,12 +487,15 @@ const WordController = (function() {
     };
 })();
 
-window.EventBus.subscribe('pronounceButtonClicked', () => {
-    // Call the pronounceWord method from AudioService
-    if (window.AudioService && typeof window.AudioService.pronounceWord === 'function') {
-        window.AudioService.pronounceWord();
-    }
-});
+// Subscribe to pronounce button clicks
+if (window.EventBus) {
+    window.EventBus.subscribe('pronounceButtonClicked', () => {
+        // Call the pronounceWord method from AudioService
+        if (window.AudioService && typeof window.AudioService.pronounceWord === 'function') {
+            window.AudioService.pronounceWord();
+        }
+    });
+}
 
 // Export the module
 window.WordController = WordController;

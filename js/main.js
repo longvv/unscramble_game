@@ -1,8 +1,8 @@
 /**
  * Main entry point for Word Scramble Game
  * Initializes all modules and starts the game
- * - Updated to use the new architecture with EventBus and GameState
- * - Added fallback for missing DragDropManager
+ * - Updated to prioritize DatabaseService for data persistence
+ * - Maintains backward compatibility with StorageService
  */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Word Scramble Game...');
@@ -54,13 +54,20 @@ async function initializeModules() {
         };
     }
     
-    // 3. Database Service (new SQLite implementation)
+    // 3. Initialize Database Service (new IndexedDB implementation)
+    let dbInitialized = false;
     if (window.DatabaseService) {
         console.log('Initializing DatabaseService...');
         try {
             // Initialize Database to load word data
             await window.DatabaseService.init();
             console.log('DatabaseService initialized successfully');
+            dbInitialized = true;
+            
+            // Publish event for database initialization complete
+            if (window.EventBus) {
+                window.EventBus.publish('databaseInitialized', { success: true });
+            }
             
             // Hide loading overlay
             const loadingOverlay = document.getElementById('loading-overlay');
@@ -77,18 +84,25 @@ async function initializeModules() {
             if (loadingOverlay) {
                 const message = loadingOverlay.querySelector('p');
                 if (message) {
-                    message.textContent = 'Error loading game data. Please refresh the page.';
-                    message.style.color = '#ff6b6b';
+                    message.textContent = 'Error loading game data. Falling back to local storage.';
+                    message.style.color = '#ff9966';  // Orange instead of red to indicate fallback, not failure
                 }
+            }
+            
+            // Publish event for database initialization failed
+            if (window.EventBus) {
+                window.EventBus.publish('databaseInitError', { error: error.message });
             }
         }
     } else {
-        console.error('DatabaseService not found!');
+        console.warn('DatabaseService not found. Will use localStorage for data persistence.');
     }
     
     // 4. Legacy StorageService - we can keep this for backward compatibility
     if (window.StorageService) {
-        console.log('Legacy StorageService available (deprecated)');
+        console.log('Legacy StorageService available (used as fallback)');
+    } else if (!dbInitialized) {
+        console.error('Neither DatabaseService nor StorageService are available! Data will not persist.');
     }
     
     // 5. AudioService
@@ -177,7 +191,7 @@ async function initializeModules() {
         console.error('Error initializing DragDropManager:', error);
     }
     
-    // 7. Word Manager (depends on StorageService, UIFactory)
+    // 7. Word Manager (depends on StorageService/DatabaseService, UIFactory)
     if (window.WordManager) {
         console.log('Initializing WordManager...');
         try {
@@ -369,12 +383,16 @@ function shareGame(method) {
     const gameUrl = window.location.href;
     const shareText = `${gameDescription} Play it here: ${gameUrl}`;
     
-    // Get current score if available
+    // Get current score if available - now works with either DatabaseService or GameState
     let score = "";
+    
+    // Try getting score from GameState first (most up-to-date)
     if (window.GameState && typeof window.GameState.getState === 'function') {
         const gameState = window.GameState.getState();
         score = gameState && gameState.score !== undefined ? ` My current score is ${gameState.score}!` : "";
-    } else {
+    } 
+    // Fallback to DOM if needed
+    else {
         const scoreElement = document.getElementById('score');
         score = scoreElement ? ` My current score is ${scoreElement.textContent}!` : "";
     }

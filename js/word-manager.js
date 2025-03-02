@@ -1,6 +1,7 @@
 /**
  * Word Manager Module for Word Scramble Game
  * Handles word list management and image association
+ * Modified to use DatabaseService instead of StorageService
  */
 const WordManager = (function() {
     // Private state
@@ -84,7 +85,7 @@ const WordManager = (function() {
     /**
      * Add a word to the list
      */
-    function _addWordToList() {
+    async function _addWordToList() {
         const wordInput = _elements.newWordInput;
         const word = wordInput.value.trim().toLowerCase();
         
@@ -94,36 +95,47 @@ const WordManager = (function() {
             return;
         }
         
-        // Check if word already exists
+        // Check if word already exists in database
         if (_words.includes(word)) {
             alert('This word is already in the list.');
             return;
         }
         
-        // Add word to the list
-        _words.push(word);
-        
-        // Associate image with word if uploaded
-        if (_tempImageData) {
-            _wordImages[word] = _tempImageData;
-            _tempImageData = null;
+        try {
+            // Add word to the database
+            await window.DatabaseService.addWord(word, true);
+            
+            // Associate image with word if uploaded
+            if (_tempImageData) {
+                await window.DatabaseService.addWordImage(word, _tempImageData);
+                _tempImageData = null;
+            }
+            
+            // Refresh our local cache of words
+            _words = await window.DatabaseService.getWords();
+            _wordImages = await window.DatabaseService.getWordImages();
+            
+            // Create word item in UI
+            const wordItem = window.UIFactory.createWordItem(
+                word, 
+                _wordImages[word] || null,
+                _removeWord
+            );
+            
+            _elements.wordList.appendChild(wordItem);
+            
+            // Clear input and preview
+            wordInput.value = '';
+            window.UIFactory.resetImagePreview(_elements.imagePreview);
+            
+            // Publish event if EventBus is available
+            if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                window.EventBus.publish('wordAdded', { word });
+            }
+        } catch (error) {
+            console.error('Error adding word:', error);
+            alert('Failed to add word. Please try again.');
         }
-        
-        // Create word item in UI
-        const wordItem = window.UIFactory.createWordItem(
-            word, 
-            _wordImages[word] || null,
-            _removeWord
-        );
-        
-        _elements.wordList.appendChild(wordItem);
-        
-        // Clear input and preview
-        wordInput.value = '';
-        window.UIFactory.resetImagePreview(_elements.imagePreview);
-        
-        // Save word data
-        _saveWordData();
     }
     
     /**
@@ -131,39 +143,68 @@ const WordManager = (function() {
      * @param {HTMLElement} wordItem - Word item element
      * @param {string} word - Word to remove
      */
-    function _removeWord(wordItem, word) {
-        // Remove from arrays
-        const index = _words.indexOf(word);
-        if (index !== -1) {
-            _words.splice(index, 1);
+    async function _removeWord(wordItem, word) {
+        try {
+            // Remove word from database
+            await window.DatabaseService.deleteWord(word);
+            
+            // Remove word image from database
+            await window.DatabaseService.deleteWordImage(word);
+            
+            // Remove from UI
+            wordItem.remove();
+            
+            // Update local cache
+            const index = _words.indexOf(word);
+            if (index !== -1) {
+                _words.splice(index, 1);
+            }
+            
+            if (_wordImages[word]) {
+                delete _wordImages[word];
+            }
+            
+            // Publish event if EventBus is available
+            if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                window.EventBus.publish('wordRemoved', { word });
+            }
+        } catch (error) {
+            console.error('Error removing word:', error);
+            alert('Failed to remove word. Please try again.');
         }
-        
-        // Remove image association
-        if (_wordImages[word]) {
-            delete _wordImages[word];
-        }
-        
-        // Remove from UI
-        wordItem.remove();
-        
-        // Save word data
-        _saveWordData();
     }
     
     /**
-     * Save word data to localStorage
+     * Load word data from database
      */
-    function _saveWordData() {
-        StorageService.saveWords(_words);
-        StorageService.saveWordImages(_wordImages);
-    }
-    
-    /**
-     * Load word data from localStorage
-     */
-    function _loadWordData() {
-        _words = StorageService.getWords();
-        _wordImages = StorageService.getWordImages();
+    async function _loadWordData() {
+        try {
+            // Check if database is initialized
+            if (!window.DatabaseService || !window.DatabaseService.isInitialized()) {
+                console.error('Database service not initialized');
+                return false;
+            }
+            
+            // Load words from database
+            _words = await window.DatabaseService.getWords();
+            
+            // Load word images from database
+            _wordImages = await window.DatabaseService.getWordImages();
+            
+            return true;
+        } catch (error) {
+            console.error('Error loading word data from database:', error);
+            
+            // Fall back to localStorage if database fails
+            if (window.StorageService) {
+                console.log('Falling back to localStorage for word data');
+                _words = window.StorageService.getWords();
+                _wordImages = window.StorageService.getWordImages();
+                return true;
+            }
+            
+            return false;
+        }
     }
     
     /**
@@ -188,12 +229,9 @@ const WordManager = (function() {
          * @param {Object} elements - DOM elements
          * @returns {Object} WordManager for chaining
          */
-        init: function(elements) {
+        init: async function(elements) {
             // Store DOM elements
             _elements = elements;
-            
-            // Load saved words
-            _loadWordData();
             
             // Setup image upload
             if (_elements.imageUploadArea && _elements.imageUpload && _elements.imagePreview) {
@@ -214,11 +252,23 @@ const WordManager = (function() {
                 });
             }
             
-            // Populate word list
-            if (_elements.wordList) {
-                _populateWordList();
-            } else {
-                console.error('Missing word list element');
+            // Load saved words from database
+            try {
+                await _loadWordData();
+                
+                // Populate word list
+                if (_elements.wordList) {
+                    _populateWordList();
+                } else {
+                    console.error('Missing word list element');
+                }
+                
+                // Publish event if EventBus is available
+                if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                    window.EventBus.publish('wordManagerInitialized', { wordCount: _words.length });
+                }
+            } catch (error) {
+                console.error('Error initializing WordManager:', error);
             }
             
             return this;
@@ -245,9 +295,9 @@ const WordManager = (function() {
          * Add a new word programmatically
          * @param {string} word - Word to add
          * @param {string} imageUrl - Image URL (optional)
-         * @returns {boolean} Success status
+         * @returns {Promise<boolean>} Success status
          */
-        addWord: function(word, imageUrl) {
+        addWord: async function(word, imageUrl) {
             word = word.trim().toLowerCase();
             
             // Validate
@@ -255,53 +305,95 @@ const WordManager = (function() {
                 return false;
             }
             
-            // Add word
-            _words.push(word);
-            
-            // Associate image if provided
-            if (imageUrl) {
-                _wordImages[word] = imageUrl;
+            try {
+                // Add word to database
+                await window.DatabaseService.addWord(word, true);
+                
+                // Associate image if provided
+                if (imageUrl) {
+                    await window.DatabaseService.addWordImage(word, imageUrl);
+                }
+                
+                // Update local cache
+                _words = await window.DatabaseService.getWords();
+                _wordImages = await window.DatabaseService.getWordImages();
+                
+                // Update UI if word list element exists
+                if (_elements.wordList) {
+                    const wordItem = window.UIFactory.createWordItem(word, imageUrl, _removeWord);
+                    _elements.wordList.appendChild(wordItem);
+                }
+                
+                // Publish event if EventBus is available
+                if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                    window.EventBus.publish('wordAdded', { word });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error adding word programmatically:', error);
+                return false;
             }
-            
-            // Update UI
-            const wordItem = window.UIFactory.createWordItem(word, imageUrl, _removeWord);
-            _elements.wordList.appendChild(wordItem);
-            
-            // Save data
-            _saveWordData();
-            
-            return true;
         },
         
         /**
          * Remove a word programmatically
          * @param {string} word - Word to remove
-         * @returns {boolean} Success status
+         * @returns {Promise<boolean>} Success status
          */
-        removeWord: function(word) {
-            const index = _words.indexOf(word);
-            if (index === -1) {
+        removeWord: async function(word) {
+            try {
+                // Remove word from database
+                await window.DatabaseService.deleteWord(word);
+                
+                // Remove word image from database
+                await window.DatabaseService.deleteWordImage(word);
+                
+                // Update UI if word list element exists
+                if (_elements.wordList) {
+                    const wordItem = _elements.wordList.querySelector(`[data-word="${word}"]`);
+                    if (wordItem) {
+                        wordItem.remove();
+                    }
+                }
+                
+                // Update local cache
+                const index = _words.indexOf(word);
+                if (index !== -1) {
+                    _words.splice(index, 1);
+                }
+                
+                if (_wordImages[word]) {
+                    delete _wordImages[word];
+                }
+                
+                // Publish event if EventBus is available
+                if (window.EventBus && typeof window.EventBus.publish === 'function') {
+                    window.EventBus.publish('wordRemoved', { word });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error removing word programmatically:', error);
                 return false;
             }
-            
-            // Remove from arrays
-            _words.splice(index, 1);
-            
-            // Remove image association
-            if (_wordImages[word]) {
-                delete _wordImages[word];
+        },
+        
+        /**
+         * Refresh word data from database
+         * @returns {Promise<boolean>} Success status
+         */
+        refreshData: async function() {
+            try {
+                await _loadWordData();
+                if (_elements.wordList) {
+                    _populateWordList();
+                }
+                return true;
+            } catch (error) {
+                console.error('Error refreshing word data:', error);
+                return false;
             }
-            
-            // Update UI
-            const wordItem = _elements.wordList.querySelector(`[data-word="${word}"]`);
-            if (wordItem) {
-                wordItem.remove();
-            }
-            
-            // Save data
-            _saveWordData();
-            
-            return true;
         }
     };
 })();
