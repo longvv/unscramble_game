@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Initialize modules in the correct dependency order
  */
-function initializeModules() {
+async function initializeModules() {
     // 1. Core modules (no dependencies)
     if (window.GameConfig) {
         console.log('GameConfig loaded');
@@ -54,13 +54,44 @@ function initializeModules() {
         };
     }
     
-    // 3. Services (depend on GameConfig)
-    if (window.StorageService) {
-        console.log('StorageService loaded');
+    // 3. Database Service (new SQLite implementation)
+    if (window.DatabaseService) {
+        console.log('Initializing DatabaseService...');
+        try {
+            // Initialize Database to load word data
+            await window.DatabaseService.init();
+            console.log('DatabaseService initialized successfully');
+            
+            // Hide loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('loaded');
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error initializing DatabaseService:', error);
+            // Show error message in loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                const message = loadingOverlay.querySelector('p');
+                if (message) {
+                    message.textContent = 'Error loading game data. Please refresh the page.';
+                    message.style.color = '#ff6b6b';
+                }
+            }
+        }
     } else {
-        console.error('StorageService not found!');
+        console.error('DatabaseService not found!');
     }
     
+    // 4. Legacy StorageService - we can keep this for backward compatibility
+    if (window.StorageService) {
+        console.log('Legacy StorageService available (deprecated)');
+    }
+    
+    // 5. AudioService
     if (window.AudioService) {
         console.log('Initializing AudioService...');
         try {
@@ -71,26 +102,6 @@ function initializeModules() {
         }
     } else {
         console.error('AudioService not found!');
-    }
-    
-    // 4. UI Factory (depends on GameConfig)
-    if (window.UIFactory) {
-        console.log('UIFactory loaded');
-    } else {
-        console.error('UIFactory not found!');
-    }
-    
-    // 5. Game State (depends on EventBus)
-    if (window.GameState) {
-        console.log('Initializing GameState...');
-        try {
-            window.GameState.init();
-            console.log('GameState initialized');
-        } catch (error) {
-            console.error('Error initializing GameState:', error);
-        }
-    } else {
-        console.error('GameState not found!');
     }
     
     // 6. Check for DragDropManager and create fallback if not present

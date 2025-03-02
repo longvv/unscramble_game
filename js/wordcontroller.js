@@ -146,7 +146,7 @@ const WordController = (function() {
      * Load the next word
      * @returns {boolean} Success status
      */
-    function _loadNextWord() {
+    async function _loadNextWord() {
         try {
             // Safety check for GameState
             if (!window.GameState || typeof window.GameState.getState !== 'function') {
@@ -191,7 +191,7 @@ const WordController = (function() {
                 });
             }
             
-            // Choose a random word
+            // Get a random word
             const randomIndex = Math.floor(Math.random() * availableWords.length);
             const currentWord = availableWords[randomIndex];
             
@@ -201,8 +201,26 @@ const WordController = (function() {
             
             // Get image URL for word
             let currentImageUrl = null;
-            if (window.WordManager && typeof window.WordManager.getWordImage === 'function') {
+
+            // First try to get the image from DatabaseService (preferred)
+            if (window.DatabaseService && typeof window.DatabaseService.getWordImages === 'function') {
+                try {
+                    const dbWordImages = await window.DatabaseService.getWordImages();
+                    currentImageUrl = dbWordImages[currentWord.toLowerCase()];
+                } catch (error) {
+                    console.warn('Error getting image from DatabaseService:', error);
+                }
+            }
+            
+            // If no image from DatabaseService, try WordManager
+            if (!currentImageUrl && window.WordManager && typeof window.WordManager.getWordImage === 'function') {
                 currentImageUrl = window.WordManager.getWordImage(currentWord);
+            } 
+            
+            // If still no image, try legacy StorageService
+            if (!currentImageUrl && window.StorageService && typeof window.StorageService.getWordImages === 'function') {
+                const wordImages = window.StorageService.getWordImages();
+                currentImageUrl = wordImages[currentWord.toLowerCase()];
             }
             
             // Scramble the word
