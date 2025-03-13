@@ -1,0 +1,73 @@
+{
+  "name": "word-scramble-game",
+  "version": "1.0.0",
+  "description": "A fun and interactive word scramble game for children to learn vocabulary",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s .",
+    "build": "npm run clean && npm run copy-assets && npm run minify-js && npm run minify-css && npm run generate-pwa-assets",
+    "clean": "rimraf dist",
+    "copy-assets": "mkdir -p dist && cp -r index.html offline.html manifest.json favicon.ico dist/ && cp -r images dist/",
+    "minify-js": "uglifyjs js/*.js -o dist/js/app.min.js",
+    "minify-css": "cleancss style.css -o dist/style.min.css",
+    "generate-pwa-assets": "pwa-asset-generator icon-512x512.png ./dist --icon-only --favicon --opaque false",
+    "generate-icons": "pwa-asset-generator icon-512x512.png ./dist/icons --icon-only --favicon --maskable",
+    "generate-splash": "pwa-asset-generator splash-screen.png ./dist/splash --splash-only --portrait-only",
+    "serve": "serve dist",
+    "lint": "eslint js/",
+    "test": "echo \"No tests yet\"",
+    "deploy": "npm run build && firebase deploy",
+    "build:android": "npm run build && cordova platform add android && cordova build android",
+    "build:ios": "npm run build && cordova platform add ios && cordova build ios",
+    "build:capacitor": "npm run build && cap sync"
+  },
+  "keywords": [
+    "word-game",
+    "education",
+    "vocabulary",
+    "children",
+    "learning",
+    "pwa"
+  ],
+  "author": "Word Scramble Game",
+  "license": "MIT",
+  "devDependencies": {
+    "clean-css-cli": "^5.6.2",
+    "cordova": "^12.0.0",
+    "eslint": "^8.40.0",
+    "firebase-tools": "^12.0.1",
+    "pwa-asset-generator": "^6.3.1",
+    "rimraf": "^5.0.1",
+    "serve": "^14.2.0",
+    "uglify-js": "^3.17.4",
+    "@capacitor/cli": "^5.1.0",
+    "@capacitor/android": "^5.1.0",
+    "@capacitor/ios": "^5.1.0",
+    "@capacitor/core": "^5.1.0"
+  },
+  "dependencies": {
+    "workbox-cli": "^7.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "plugins": {
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-inappbrowser": {},
+      "cordova-plugin-network-information": {}
+    }
+  },
+  "capacitor": {
+    "android": {
+      "path": "mobile/android"
+    },
+    "ios": {
+      "path": "mobile/ios"
+    }
+  }
+}

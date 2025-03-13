@@ -4,12 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Word Scramble Game</title>
+    
+    <!-- App meta information -->
+    <meta name="description" content="A fun and interactive word scramble game for children to learn English vocabulary">
+    <meta name="keywords" content="word game, children, education, vocabulary, spelling, learning">
+    <meta name="author" content="Word Scramble Game">
+    
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Word Scramble">
+    
+    <!-- Android specific meta tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ff6b6b">
+    <meta name="application-name" content="Word Scramble">
+    
+    <!-- App icons and splash screens -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#ff6b6b">
+    
+    <!-- iOS splash screens -->
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-1242-2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-828-1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-1242-2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-750-1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="splash/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+        
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="style.css">
-    <!-- Comment out the manifest link when running locally via file:// protocol -->
-    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <!-- Manifest file for PWA -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
+    <!-- Offline notification banner -->
+    <div id="offline-notification" class="offline-notification">
+        <div class="offline-content">
+            <i class="fas fa-wifi"></i>
+            <span>You're offline. Some features may be limited.</span>
+        </div>
+    </div>
+
+    <!-- App install promotion banner -->
+    <div id="install-banner" class="install-banner">
+        <div class="install-content">
+            <img src="icon-192x192.png" alt="App Icon" class="install-icon">
+            <div class="install-text">
+                <h3>Install Word Scramble Game</h3>
+                <p>Add to your home screen for the best experience</p>
+            </div>
+            <button id="install-button" class="install-button">Install</button>
+            <button id="close-install-button" class="close-button"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-container">
             <div class="loading-spinner"></div>
@@ -47,11 +103,6 @@
         </div>
         
         <div class="game-area">
-            <!-- Remove this first score-container -->
-            <!-- <div class="score-container">
-                <p>Score: <span id="score">0</span></p>
-            </div> -->
-            
             <!-- Celebration element for animation -->
             <div id="celebration-element" class="celebration-element">
                 <div class="celebration-content">
@@ -82,10 +133,18 @@
             </div>
             
             <div class="buttons-container">
-                <button id="hint-btn" class="game-btn">Hint</button>
-                <button id="pronounce-btn" class="game-btn">Pronounce</button>
-                <button id="check-btn" class="game-btn primary">Check</button>
-                <button id="next-btn" class="game-btn">Next Word</button>
+                <button id="hint-btn" class="game-btn">
+                    <i class="fas fa-lightbulb"></i> Hint
+                </button>
+                <button id="pronounce-btn" class="game-btn">
+                    <i class="fas fa-volume-up"></i> Pronounce
+                </button>
+                <button id="check-btn" class="game-btn primary">
+                    <i class="fas fa-check"></i> Check
+                </button>
+                <button id="next-btn" class="game-btn">
+                    <i class="fas fa-forward"></i> Next Word
+                </button>
             </div>
         </div>
         
@@ -100,18 +159,37 @@
                     <div id="image-preview" class="image-preview"></div>
                     <div class="upload-instruction">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Drag & drop image here or click to upload</p>
+                        <p>Drag & drop image here or tap to upload</p>
                     </div>
                 </div>
                 
-                <button id="add-word-btn" class="game-btn primary">Add Word</button>
+                <button id="add-word-btn" class="game-btn primary">
+                    <i class="fas fa-plus"></i> Add Word
+                </button>
             </div>
             
             <div class="word-list-container">
                 <h3>Your Words:</h3>
                 <div id="word-items" class="word-items"></div>
-                <button id="save-words-btn" class="game-btn primary">Save Changes</button>
+                <button id="save-words-btn" class="game-btn primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
             </div>
+        </div>
+        
+        <footer class="app-footer">
+            <p>Word Scramble Game &copy; 2025</p>
+            <div class="app-version">Version 1.0.0</div>
+        </footer>
+    </div>
+    
+    <!-- Offline page - displayed when user is offline and content isn't cached -->
+    <div id="offline-page" class="offline-page" style="display: none;">
+        <div class="offline-content">
+            <img src="icon-192x192.png" alt="App Icon" class="offline-icon">
+            <h2>You're Offline</h2>
+            <p>Please check your internet connection and try again.</p>
+            <button id="reload-button" class="game-btn primary">Try Again</button>
         </div>
     </div>
     
@@ -126,10 +204,10 @@
     
     <!-- Scripts -->
     <script>
-        // Modified service worker registration to only run when not on file:// protocol
-        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+        // PWA service worker registration
+        if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('js/service-worker.js')
+                navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
@@ -138,8 +216,86 @@
                     });
             });
         }
+        
+        // Detect offline/online status
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        function updateOnlineStatus() {
+            const offlineNotification = document.getElementById('offline-notification');
+            if (!navigator.onLine) {
+                offlineNotification.classList.add('show');
+            } else {
+                offlineNotification.classList.remove('show');
+            }
+        }
+        
+        // Check initial online status
+        document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+        
+        // Handle PWA install prompt
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installButton = document.getElementById('install-button');
+        const closeInstallButton = document.getElementById('close-install-button');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install banner
+            installBanner.classList.add('show');
+        });
+        
+        installButton.addEventListener('click', () => {
+            // Hide the banner
+            installBanner.classList.remove('show');
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
+        
+        closeInstallButton.addEventListener('click', () => {
+            installBanner.classList.remove('show');
+        });
+        
+        // Handle "Add to Home Screen" for iOS
+        // Since iOS doesn't support beforeinstallprompt
+        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        
+        if (isIOS && !isStandalone && !localStorage.getItem('install-prompt-shown')) {
+            // Show iOS-specific install instructions after a delay
+            setTimeout(() => {
+                installBanner.classList.add('show', 'ios');
+                document.querySelector('.install-text p').textContent = 
+                    'Tap the share icon and select "Add to Home Screen"';
+                installButton.style.display = 'none';
+                
+                // Mark that we've shown the prompt
+                localStorage.setItem('install-prompt-shown', 'true');
+            }, 5000);
+        }
+        
+        // Reload button on offline page
+        const reloadButton = document.getElementById('reload-button');
+        if (reloadButton) {
+            reloadButton.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
     </script>
-    <!-- Scripts -->
+    
+    <!-- Core game scripts -->
     <script src="js/config.js"></script>
     <script src="js/eventbus.js"></script>
     <script src="js/gamestate.js"></script>

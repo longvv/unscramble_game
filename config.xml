@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.wordscramble.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Word Scramble</name>
+    <description>
+        A fun and interactive word scramble game for children to learn English vocabulary through play.
+    </description>
+    <author email="contact@wordscramble.com" href="https://wordscramble.com">
+        Word Scramble Team
+    </author>
+    <content src="index.html" />
+    
+    <!-- App Display -->
+    <preference name="Orientation" value="portrait" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="BackgroundColor" value="0xfff0f8ff" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#ff6b6b" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    
+    <!-- iOS Specific -->
+    <platform name="ios">
+        <preference name="WKWebViewOnly" value="true" />
+        <preference name="AllowInlineMediaPlayback" value="true"/>
+        <preference name="AllowBackForwardNavigationGestures" value="true"/>
+        <preference name="EnableViewportScale" value="true"/>
+        <preference name="SuppressesLongPressGesture" value="true"/>
+        
+        <!-- iOS App Icon -->
+        <icon src="res/ios/icon-20.png" width="20" height="20" />
+        <icon src="res/ios/icon-29.png" width="29" height="29" />
+        <icon src="res/ios/icon-40.png" width="40" height="40" />
+        <icon src="res/ios/icon-50.png" width="50" height="50" />
+        <icon src="res/ios/icon-57.png" width="57" height="57" />
+        <icon src="res/ios/icon-60.png" width="60" height="60" />
+        <icon src="res/ios/icon-72.png" width="72" height="72" />
+        <icon src="res/ios/icon-76.png" width="76" height="76" />
+        <icon src="res/ios/icon-83.5.png" width="83.5" height="83.5" />
+        <icon src="res/ios/icon-1024.png" width="1024" height="1024" />
+        
+        <!-- iOS Splash Screens -->
+        <splash src="res/screen/ios/Default@2x~universal~anyany.png" />
+        <splash src="res/screen/ios/Default@2x~universal~comany.png" />
+        <splash src="res/screen/ios/Default@2x~universal~comcom.png" />
+        <splash src="res/screen/ios/Default@3x~universal~anyany.png" />
+        <splash src="res/screen/ios/Default@3x~universal~anycom.png" />
+        <splash src="res/screen/ios/Default@3x~universal~comany.png" />
+    </platform>
+    
+    <!-- Android Specific -->
+    <platform name="android">
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splash.png" />
+        <preference name="SplashScreenDelay" value="3000" />
+        <preference name="SplashMaintainAspectRatio" value="true" />
+        <preference name="AndroidInsecureFileModeEnabled" value="false" />
+        <preference name="AndroidExtraFilesystems" value="files,files-external,documents,cache,cache-external" />
+        
+        <!-- Android App Icons -->
+        <icon density="ldpi" src="res/android/icon-36-ldpi.png" />
+        <icon density="mdpi" src="res/android/icon-48-mdpi.png" />
+        <icon density="hdpi" src="res/android/icon-72-hdpi.png" />
+        <icon density="xhdpi" src="res/android/icon-96-xhdpi.png" />
+        <icon density="xxhdpi" src="res/android/icon-144-xxhdpi.png" />
+        <icon density="xxxhdpi" src="res/android/icon-192-xxxhdpi.png" />
+        
+        <!-- Android Splash Screens -->
+        <splash density="land-hdpi" src="res/screen/android/splash-land-hdpi.png" />
+        <splash density="land-ldpi" src="res/screen/android/splash-land-ldpi.png" />
+        <splash density="land-mdpi" src="res/screen/android/splash-land-mdpi.png" />
+        <splash density="land-xhdpi" src="res/screen/android/splash-land-xhdpi.png" />
+        <splash density="port-hdpi" src="res/screen/android/splash-port-hdpi.png" />
+        <splash density="port-ldpi" src="res/screen/android/splash-port-ldpi.png" />
+        <splash density="port-mdpi" src="res/screen/android/splash-port-mdpi.png" />
+        <splash density="port-xhdpi" src="res/screen/android/splash-port-xhdpi.png" />
+        <splash density="port-xxhdpi" src="res/screen/android/splash-port-xxhdpi.png" />
+        <splash density="port-xxxhdpi" src="res/screen/android/splash-port-xxxhdpi.png" />
+    </platform>
+    
+    <!-- Access Origins -->
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    
+    <!-- Platform-specific permissions -->
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+    </platform>
+    
+    <!-- Required Plugins -->
+    <plugin name="cordova-plugin-statusbar" spec="~2.4.3" />
+    <plugin name="cordova-plugin-device" spec="~2.0.3" />
+    <plugin name="cordova-plugin-splashscreen" spec="~6.0.0" />
+    <plugin name="cordova-plugin-ionic-webview" spec="~5.0.0" />
+    <plugin name="cordova-plugin-ionic-keyboard" spec="~2.2.0" />
+    <plugin name="cordova-plugin-network-information" spec="~3.0.0" />
+</widget>

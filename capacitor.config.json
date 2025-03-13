@@ -1,0 +1,38 @@
+{
+  "appId": "com.wordscramble.app",
+  "appName": "Word Scramble",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#f0f8ff",
+  "androidSplashScreen": {
+    "backgroundColor": "#f0f8ff",
+    "splashFullScreen": true,
+    "splashImmersive": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#f0f8ff",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "spinnerColor": "#ff6b6b",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#ff6b6b"
+    }
+  },
+  "server": {
+    "hostname": "app.wordscramble.com",
+    "androidScheme": "https"
+  }
+}

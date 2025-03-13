@@ -1,0 +1,215 @@
+@startuml Word Scramble Game Flow
+
+actor User
+participant "Main" as Main
+participant "GameConfig" as Config
+participant "EventBus" as EventBus
+participant "DatabaseService" as DB
+participant "StorageService" as Storage
+participant "AudioService" as Audio
+participant "DragDropManager" as DragDrop
+participant "GameState" as GameState
+participant "WordManager" as WordManager
+participant "WordController" as WordController
+participant "GameController" as GameController
+participant "UIFactory" as UIFactory
+
+== Initialization Phase ==
+
+User -> Main: Load Application
+activate Main
+
+Main -> Config: Check Availability
+activate Config
+Config --> Main: Loaded
+deactivate Config
+
+Main -> EventBus: Check Availability
+activate EventBus
+EventBus --> Main: Loaded
+deactivate EventBus
+
+Main -> DB: Initialize
+activate DB
+note right: Attempt to use IndexedDB
+DB --> EventBus: Publish 'databaseInitialized'
+DB --> Main: Initialized
+deactivate DB
+
+Main -> Storage: Check Availability
+activate Storage
+note right: Fallback for data persistence
+Storage --> Main: Available
+deactivate Storage
+
+Main -> Audio: Initialize
+activate Audio
+Audio --> Main: Initialized
+deactivate Audio
+
+Main -> DragDrop: Initialize
+activate DragDrop
+DragDrop --> Main: Initialized
+deactivate DragDrop
+
+Main -> GameState: Initialize
+activate GameState
+GameState --> Main: Initialized
+deactivate GameState
+
+Main -> WordManager: Initialize
+activate WordManager
+WordManager -> DB: Load Words
+DB --> WordManager: Words Data
+WordManager --> Main: Initialized
+deactivate WordManager
+
+Main -> WordController: Initialize
+activate WordController
+WordController --> Main: Initialized
+deactivate WordController
+
+Main -> GameController: Initialize
+activate GameController
+GameController -> EventBus: Subscribe to Events
+GameController -> DB: Load Score
+DB --> GameController: Score Data
+GameController --> Main: Initialized
+deactivate GameController
+
+Main --> User: Game Ready
+deactivate Main
+
+== Gameplay Phase ==
+
+User -> GameController: Start Game
+activate GameController
+GameController -> WordController: Load First Word
+activate WordController
+
+WordController -> WordManager: Get Random Word
+activate WordManager
+WordManager --> WordController: Word Data
+deactivate WordManager
+
+WordController -> WordController: Scramble Word
+WordController -> UIFactory: Create Letter Tiles
+activate UIFactory
+UIFactory --> WordController: UI Elements Created
+deactivate UIFactory
+
+WordController -> UIFactory: Create Letter Boxes
+activate UIFactory
+UIFactory --> WordController: UI Elements Created
+deactivate UIFactory
+
+WordController -> DragDrop: Setup Drag-Drop Handlers
+activate DragDrop
+DragDrop --> WordController: Handlers Set
+deactivate DragDrop
+
+WordController --> GameController: Word Loaded
+deactivate WordController
+GameController --> User: Display Word
+deactivate GameController
+
+== User Interaction ==
+
+User -> DragDrop: Drag Letter
+activate DragDrop
+DragDrop -> Audio: Play Drag Sound
+activate Audio
+Audio --> DragDrop: Sound Played
+deactivate Audio
+DragDrop --> User: Visual Feedback
+deactivate DragDrop
+
+User -> DragDrop: Drop Letter
+activate DragDrop
+DragDrop -> EventBus: Publish 'letterPlaced'
+activate EventBus
+EventBus --> DragDrop: Event Published
+deactivate EventBus
+DragDrop --> User: Letter Placed
+deactivate DragDrop
+
+User -> GameController: Check Answer
+activate GameController
+GameController -> GameState: Get Current State
+activate GameState
+GameState --> GameController: Game State
+deactivate GameState
+
+alt Correct Answer
+    GameController -> Audio: Play Correct Sound
+    activate Audio
+    Audio --> GameController: Sound Played
+    deactivate Audio
+    
+    GameController -> Audio: Pronounce Word
+    activate Audio
+    Audio --> GameController: Word Pronounced
+    deactivate Audio
+    
+    GameController -> GameState: Update Score
+    activate GameState
+    GameState --> GameController: State Updated
+    deactivate GameState
+    
+    GameController -> DB: Save Score
+    activate DB
+    DB --> GameController: Score Saved
+    deactivate DB
+    
+    GameController -> EventBus: Publish 'answerCorrect'
+    activate EventBus
+    EventBus --> GameController: Event Published
+    deactivate EventBus
+    
+    GameController -> GameController: Show Celebration
+    GameController -> WordController: Load Next Word
+    activate WordController
+    note right: Process repeats for next word
+    WordController --> GameController: Next Word Loaded
+    deactivate WordController
+    
+    GameController --> User: Celebration & Next Word
+else Incorrect Answer
+    GameController -> Audio: Play Wrong Sound
+    activate Audio
+    Audio --> GameController: Sound Played
+    deactivate Audio
+    
+    GameController -> EventBus: Publish 'answerIncorrect'
+    activate EventBus
+    EventBus --> GameController: Event Published
+    deactivate EventBus
+    
+    GameController --> User: Error Feedback
+end
+deactivate GameController
+
+== Word Management ==
+
+User -> WordManager: Add New Word
+activate WordManager
+WordManager -> WordManager: Validate Word
+WordManager -> UIFactory: Create Image Preview
+activate UIFactory
+UIFactory --> WordManager: Preview Created
+deactivate UIFactory
+
+WordManager -> DB: Save New Word
+activate DB
+DB --> WordManager: Word Saved
+deactivate DB
+
+WordManager -> EventBus: Publish 'wordAdded'
+activate EventBus
+EventBus --> WordManager: Event Published
+deactivate EventBus
+
+WordManager --> User: Word Added Confirmation
+deactivate WordManager
+
+@enduml

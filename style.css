@@ -1479,3 +1479,305 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Offline notification banner */
+.offline-notification {
+    position: fixed;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    z-index: 1000;
+    transition: top 0.3s ease-in-out;
+}
+
+.offline-notification.show {
+    top: 0;
+}
+
+.offline-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.offline-content i {
+    color: #f39c12;
+}
+
+/* App Install Banner */
+.install-banner {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 990;
+    transition: bottom 0.3s ease-in-out;
+    padding: 15px;
+}
+
+.install-banner.show {
+    bottom: 0;
+}
+
+.install-content {
+    display: flex;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.install-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    border-radius: 8px;
+}
+
+.install-text {
+    flex-grow: 1;
+}
+
+.install-text h3 {
+    font-size: 1rem;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.install-text p {
+    font-size: 0.8rem;
+    margin: 0;
+    color: #666;
+}
+
+.install-button {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: #999;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* iOS-specific install prompt */
+.install-banner.ios .install-text p {
+    padding-right: 20px;
+}
+
+/* Offline page */
+.offline-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f8ff;
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.offline-content {
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: 320px;
+}
+
+.offline-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+/* Tap highlight removal on mobile */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* App footer */
+.app-footer {
+    text-align: center;
+    padding: 20px 0;
+    color: #999;
+    font-size: 0.8rem;
+    margin-top: 30px;
+}
+
+.app-version {
+    font-size: 0.7rem;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+/* Safe area inset padding for notched devices */
+@supports (padding: env(safe-area-inset-top)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    
+    .install-banner {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Improved mobile touch targets */
+button, .letter-tile {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Prevent double-tap zoom on buttons */
+button, input[type="button"] {
+    touch-action: manipulation;
+}
+
+/* Disable text selection for better mobile UX */
+.letter-tile, .game-btn, h1, h2, h3 {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Prevent elastic overscroll on iOS */
+html {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* Optimizations for iOS PWA mode */
+@media (display-mode: standalone) {
+    /* Hide header in standalone mode */
+    .header-for-browser {
+        display: none;
+    }
+    
+    /* Add extra padding for the notch */
+    .container {
+        padding-top: env(safe-area-inset-top, 20px);
+    }
+}
+
+/* Flexible keyboard-aware layout */
+@media screen and (max-height: 600px) {
+    .container {
+        padding-bottom: 60px; /* Allow space for keyboard */
+    }
+    
+    .game-area {
+        padding: 10px;
+    }
+    
+    .image-container {
+        max-height: 120px;
+        overflow: hidden;
+    }
+    
+    #word-image {
+        max-height: 120px;
+    }
+}
+
+/* App update notification */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.update-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.update-notification i {
+    color: #4caf50;
+    font-size: 1.5rem;
+}
+
+.update-notification-text {
+    flex-grow: 1;
+}
+
+.update-notification-text h4 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+}
+
+.update-notification-text p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.update-now-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* Extra bottom padding for iPhone X and newer */
+@media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3),
+       only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2),
+       only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3),
+       only screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3),
+       only screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) {
+    .container {
+        padding-bottom: env(safe-area-inset-bottom, 34px);
+    }
+    
+    .app-footer {
+        padding-bottom: env(safe-area-inset-bottom, 34px);
+    }
+}

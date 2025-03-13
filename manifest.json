@@ -1,22 +1,88 @@
 {
     "name": "Word Scramble Game",
-    "short_name": "WordScramble",
-    "description": "Educational word game for children",
+    "short_name": "Word Scramble",
+    "description": "A fun educational word scramble game for children to learn vocabulary",
     "start_url": "/index.html",
     "display": "standalone",
+    "orientation": "portrait",
     "background_color": "#f0f8ff",
     "theme_color": "#ff6b6b",
-    "orientation": "portrait",
+    "categories": ["education", "kids", "games"],
+    "lang": "en-US",
+    "dir": "ltr",
+    "scope": "/",
+    "prefer_related_applications": true,
+    "related_applications": [
+      {
+        "platform": "play",
+        "id": "com.wordscramble.game",
+        "url": "https://play.google.com/store/apps/details?id=com.wordscramble.game"
+      },
+      {
+        "platform": "itunes",
+        "url": "https://apps.apple.com/app/word-scramble-game/id123456789"
+      }
+    ],
+    "screenshots": [
+      {
+        "src": "screenshots/screenshot1.jpg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Game screen with scrambled words"
+      },
+      {
+        "src": "screenshots/screenshot2.jpg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Word list management screen"
+      }
+    ],
     "icons": [
-        {
-            "src": "icon-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icon-512x512.png", 
-            "sizes": "512x512",
-            "type": "image/png"
-        }
+      {
+        "src": "icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "icon-maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ],
+    "shortcuts": [
+      {
+        "name": "Start Game",
+        "short_name": "Play",
+        "description": "Start playing the Word Scramble Game",
+        "url": "/index.html?action=play",
+        "icons": [
+          {
+            "src": "icons/play.png",
+            "sizes": "96x96"
+          }
+        ]
+      },
+      {
+        "name": "Manage Words",
+        "short_name": "Words",
+        "description": "Manage your word list",
+        "url": "/index.html?action=manage",
+        "icons": [
+          {
+            "src": "icons/manage.png",
+            "sizes": "96x96"
+          }
+        ]
+      }
     ]
-}
+  }

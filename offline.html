@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Word Scramble Game - Offline</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        body {
+            background-color: #f0f8ff;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .offline-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        p {
+            color: #576574;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .retry-button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .retry-button:hover {
+            background-color: #ee5253;
+        }
+
+        .offline-games {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .offline-games h2 {
+            color: #5f27cd;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .offline-game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .offline-game-btn {
+            background-color: #f9f7f7;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .offline-game-btn:hover {
+            background-color: #dfe6e9;
+            transform: translateY(-2px);
+        }
+
+        .wifi-icon {
+            font-size: 3rem;
+            color: #a5b1c2;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .offline-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            p {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <i class="fas fa-wifi wifi-icon"></i>
+        <h1>You're Offline</h1>
+        <p>Please check your internet connection and try again.</p>
+        <button class="retry-button" onclick="window.location.reload()">Try Again</button>
+        
+        <div class="offline-games">
+            <h2>Available Offline:</h2>
+            <div class="offline-game-list">
+                <button class="offline-game-btn" onclick="window.location.href='index.html'">
+                    Word Scramble Game
+                </button>
+            </div>
+            <p>The game is available offline if you've previously visited it!</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check if the service worker is registered and the game is cached
+        if ('serviceWorker' in navigator && 'caches' in window) {
+            caches.has('word-scramble-v1').then(hasCached => {
+                const offlineGameList = document.querySelector('.offline-game-list');
+                if (!hasCached) {
+                    offlineGameList.innerHTML = '<p>No games available offline yet.</p>';
+                }
+            });
+        }
+        
+        // Check if we come back online
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>
