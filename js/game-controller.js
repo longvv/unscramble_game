@@ -123,8 +123,10 @@ const GameController = (function() {
                 _showCelebration();
             }, 500);
         } else {
-            // Incorrect answer
-            window.AudioService.playSound('wrong');
+            if (userAnswer.length == gameState.currentWord.length) {
+                // Incorrect answer
+                window.AudioService.playSound('wrong');
+            }
             
             // Visual feedback for incorrect answer
             const dropArea = document.getElementById('drop-area');
