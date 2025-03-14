@@ -105,7 +105,7 @@ const PWAHandler = (function() {
         if (!installBanner) return;
         
         // Check if we've already shown this prompt
-        if (localStorage.getItem('ios-install-prompt-shown')) {
+        if (localStorage.getItem('install-prompt-shown')) {
             return;
         }
         
@@ -124,7 +124,7 @@ const PWAHandler = (function() {
         }
         
         // Mark that we've shown this prompt
-        localStorage.setItem('ios-install-prompt-shown', 'true');
+        localStorage.setItem('install-prompt-shown', 'true');
     }
     
     /**

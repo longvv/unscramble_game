@@ -223,10 +223,12 @@
         
         function updateOnlineStatus() {
             const offlineNotification = document.getElementById('offline-notification');
-            if (!navigator.onLine) {
-                offlineNotification.classList.add('show');
-            } else {
-                offlineNotification.classList.remove('show');
+            if (offlineNotification) {
+                if (!navigator.onLine) {
+                    offlineNotification.classList.add('show');
+                } else {
+                    offlineNotification.classList.remove('show');
+                }
             }
         }
         

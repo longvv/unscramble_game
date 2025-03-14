@@ -1520,10 +1520,12 @@ body {
     z-index: 990;
     transition: bottom 0.3s ease-in-out;
     padding: 15px;
+    box-sizing: border-box;
 }
 
 .install-banner.show {
     bottom: 0;
+    display: block;
 }
 
 .install-content {

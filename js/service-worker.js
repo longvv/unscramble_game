@@ -154,3 +154,31 @@ async function syncWords() {
     console.error('[Service Worker] Error syncing words:', error);
   }
 }
+
+// Add manifest.json to the list of files to cache
+self.addEventListener('fetch', event => {
+  // Check if the request is for the manifest file
+  if (event.request.url.includes('manifest.json')) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        // Clone the response
+        const newResponse = response.clone();
+        
+        // Create a new response with CORS headers
+        return new Response(newResponse.body, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type'
+          },
+          status: newResponse.status,
+          statusText: newResponse.statusText
+        });
+      }).catch(() => {
+        // If fetch fails, try to get from cache
+        return caches.match(event.request);
+      })
+    );
+  }
+});
