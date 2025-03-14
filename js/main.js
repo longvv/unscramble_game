@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .fa-facebook-messenger:before { content: "📱"; }
                 .fa-telegram:before { content: "📨"; }
                 .fa-sync-alt:before { content: "🔄"; }
+                .fa-bars:before { content: "☰"; }
+                .fa-gamepad:before { content: "🎮"; }
+                .fa-cog:before { content: "⚙️"; }
             `;
             document.head.appendChild(fallbackStyle);
         }

@@ -1,0 +1,183 @@
+/**
+ * Navigation styles for Word Scramble Game
+ * Provides styles for the top navigation bar and collapsible left menu
+ */
+
+/* Top Navigation Bar */
+.nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ff6b6b;
+    color: white;
+    padding: 10px 15px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-bar-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    flex-grow: 1;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+/* Left Menu */
+.left-menu {
+    position: fixed;
+    top: 60px; /* Below the nav bar */
+    left: -250px; /* Hidden by default */
+    width: 250px;
+    height: calc(100% - 60px);
+    background-color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+.left-menu.open {
+    left: 0;
+}
+
+.menu-overlay {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    display: none;
+}
+
+.menu-overlay.open {
+    display: block;
+}
+
+.menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: #f9f7f7;
+}
+
+.menu-item.active {
+    background-color: #f0f8ff;
+    border-left: 4px solid #ff6b6b;
+}
+
+.menu-item i {
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: #ff6b6b;
+    width: 24px;
+    text-align: center;
+}
+
+/* Content area adjustments */
+.content-container {
+    margin-top: 60px; /* Space for the nav bar */
+    padding: 15px;
+    transition: margin-left 0.3s ease;
+}
+
+.content-container.menu-open {
+    margin-left: 250px;
+}
+
+/* Screen sections */
+.screen-section {
+    display: none;
+}
+
+.screen-section.active {
+    display: block;
+}
+
+/* Responsive adjustments */
+@media (min-width: 992px) {
+    /* On larger screens, keep menu visible */
+    .left-menu {
+        left: 0;
+    }
+    
+    .content-container {
+        margin-left: 250px;
+    }
+    
+    .menu-toggle {
+        display: none;
+    }
+    
+    .menu-overlay {
+        display: none !important;
+    }
+}
+
+@media (max-width: 991px) {
+    /* On smaller screens, make menu collapsible */
+    .left-menu {
+        left: -250px;
+    }
+    
+    .left-menu.open {
+        left: 0;
+    }
+    
+    .content-container {
+        margin-left: 0;
+    }
+    
+    .content-container.menu-open {
+        margin-left: 0;
+    }
+}
+
+/* Safe area inset padding for notched devices */
+@supports (padding: env(safe-area-inset-top)) {
+    .nav-bar {
+        padding-top: env(safe-area-inset-top);
+        height: calc(60px + env(safe-area-inset-top));
+    }
+    
+    .left-menu {
+        top: calc(60px + env(safe-area-inset-top));
+        height: calc(100% - 60px - env(safe-area-inset-top));
+    }
+    
+    .content-container {
+        margin-top: calc(60px + env(safe-area-inset-top));
+    }
+}

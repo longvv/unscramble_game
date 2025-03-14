@@ -39,6 +39,7 @@
         
     <!-- Stylesheets -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/navigation.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <!-- Manifest file for PWA -->
@@ -73,8 +74,33 @@
             <p>Initializing database...</p>
         </div>
     </div>
-
-    <div class="container">
+    
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <button id="menu-toggle" class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-bar-title">Word Scramble Game</div>
+    </nav>
+    
+    <!-- Left Menu -->
+    <div id="left-menu" class="left-menu">
+        <ul class="menu-items">
+            <li class="menu-item active" data-screen="game-screen">
+                <i class="fas fa-gamepad"></i>
+                <span>Unscramble Word</span>
+            </li>
+            <li class="menu-item" data-screen="word-management-screen">
+                <i class="fas fa-cog"></i>
+                <span>Word Management</span>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Menu Overlay -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+    
+    <div id="content-container" class="content-container">
         <h1>Word Scramble Game</h1>
         
         <!-- Celebration overlay -->
@@ -102,78 +128,84 @@
             <div class="confetti" style="left:90%; background-color:#8bc34a; animation-delay:0.8s;"></div>
         </div>
         
-        <div class="game-area">
-            <!-- Celebration element for animation -->
-            <div id="celebration-element" class="celebration-element">
-                <div class="celebration-content">
-                    <h2>Excellent!</h2>
-                    <div class="star-container">
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen-section active">
+            <div class="game-area">
+                <!-- Celebration element for animation -->
+                <div id="celebration-element" class="celebration-element">
+                    <div class="celebration-content">
+                        <h2>Excellent!</h2>
+                        <div class="star-container">
+                            <div class="star"></div>
+                            <div class="star"></div>
+                            <div class="star"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="word-container">
-                <p class="instruction">Unscramble this word:</p>
-                <div class="score-container">
-                    <p>Score: <span id="score">0</span></p>
+                
+                <div class="word-container">
+                    <p class="instruction">Unscramble this word:</p>
+                    <div class="score-container">
+                        <p>Score: <span id="score">0</span></p>
+                    </div>
                 </div>
-            </div>
-            
-            <div id="scrambled-word" class="scrambled-word"></div>
-            
-            <div id="drop-area" class="drop-area">
-                <p>Drop letters here to form the word</p>
-            </div>
-            
-            <div class="image-container">
-                <img id="word-image" src="" alt="Word Image" loading="lazy">
-            </div>
-            
-            <div class="buttons-container">
-                <button id="hint-btn" class="game-btn">
-                    <i class="fas fa-lightbulb"></i> Hint
-                </button>
-                <button id="pronounce-btn" class="game-btn">
-                    <i class="fas fa-volume-up"></i> Pronounce
-                </button>
-                <button id="check-btn" class="game-btn primary">
-                    <i class="fas fa-check"></i> Check
-                </button>
-                <button id="next-btn" class="game-btn">
-                    <i class="fas fa-forward"></i> Next Word
-                </button>
+                
+                <div id="scrambled-word" class="scrambled-word"></div>
+                
+                <div id="drop-area" class="drop-area">
+                    <p>Drop letters here to form the word</p>
+                </div>
+                
+                <div class="image-container">
+                    <img id="word-image" src="" alt="Word Image" loading="lazy">
+                </div>
+                
+                <div class="buttons-container">
+                    <button id="hint-btn" class="game-btn">
+                        <i class="fas fa-lightbulb"></i> Hint
+                    </button>
+                    <button id="pronounce-btn" class="game-btn">
+                        <i class="fas fa-volume-up"></i> Pronounce
+                    </button>
+                    <button id="check-btn" class="game-btn primary">
+                        <i class="fas fa-check"></i> Check
+                    </button>
+                    <button id="next-btn" class="game-btn">
+                        <i class="fas fa-forward"></i> Next Word
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="management-area">
-            <h2>Word Management</h2>
-            
-            <div class="add-word-container">
-                <input type="text" id="new-word-input" placeholder="Enter a new word">
+        <!-- Word Management Screen -->
+        <div id="word-management-screen" class="screen-section">
+            <div class="management-area">
+                <h2>Word Management</h2>
                 
-                <div id="image-upload-area" class="image-upload-area">
-                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                    <div id="image-preview" class="image-preview"></div>
-                    <div class="upload-instruction">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Drag & drop image here or tap to upload</p>
+                <div class="add-word-container">
+                    <input type="text" id="new-word-input" placeholder="Enter a new word">
+                    
+                    <div id="image-upload-area" class="image-upload-area">
+                        <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                        <div id="image-preview" class="image-preview"></div>
+                        <div class="upload-instruction">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop image here or tap to upload</p>
+                        </div>
                     </div>
+                    
+                    <button id="add-word-btn" class="game-btn primary">
+                        <i class="fas fa-plus"></i> Add Word
+                    </button>
                 </div>
                 
-                <button id="add-word-btn" class="game-btn primary">
-                    <i class="fas fa-plus"></i> Add Word
-                </button>
-            </div>
-            
-            <div class="word-list-container">
-                <h3>Your Words:</h3>
-                <div id="word-items" class="word-items"></div>
-                <button id="save-words-btn" class="game-btn primary">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
+                <div class="word-list-container">
+                    <h3>Your Words:</h3>
+                    <div id="word-items" class="word-items"></div>
+                    <button id="save-words-btn" class="game-btn primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -298,19 +330,23 @@
     </script>
     
     <!-- Core game scripts -->
-    <script src="js/config.js"></script>
     <script src="js/eventbus.js"></script>
-    <script src="js/gamestate.js"></script>
-    <script src="js/database.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/database.js"></script>
     <script src="js/audio.js"></script>
-    <script src="js/ui-factory.js"></script>
-    <script src="js/word-manager.js"></script>
-    <script src="js/touch-drag.js"></script> 
-    <script src="js/drag-drop.js"></script> 
-    <script src="js/wordcontroller.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/touch-drag.js"></script>
     <script src="js/inputmanager.js"></script>
+    <script src="js/ui-factory.js"></script>
+    <script src="js/gamestate.js"></script>
+    <script src="js/wordcontroller.js"></script>
+    <script src="js/word-manager.js"></script>
     <script src="js/game-controller.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/pwa-handlers.js"></script>
+    <script src="js/app-reset.js"></script>
     <script src="js/main.js"></script>
+    <script src="service-worker.js"></script>
 </body>
 </html>
