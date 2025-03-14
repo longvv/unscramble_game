@@ -16,12 +16,12 @@ const GameConfig = (function() {
         
         // Sound URLs
         sounds: {
-            correct: "https://assets.mixkit.co/sfx/preview/mixkit-fairy-arcade-sparkle-866.mp3",
-            wrong: "https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3",
-            drag: "https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3",
-            hint: "https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3",
-            clapping: "https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3",
-            whistle: "https://assets.mixkit.co/sfx/preview/mixkit-referee-whistle-blow-2317.mp3"
+            correct: "assets/sounds/correct-sound.mp3",
+            wrong: "assets/sounds/wrong-sound.mp3",
+            drag: "assets/sounds/drag-sound.mp3",
+            hint: "assets/sounds/hint-sound.mp3",
+            clapping: "assets/sounds/clapping-sound.mp3",
+            whistle: "assets/sounds/whistle-sound.mp3"
         },
         
         // API endpoints

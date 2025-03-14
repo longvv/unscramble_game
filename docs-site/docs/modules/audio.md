@@ -12,7 +12,7 @@ The Audio Module manages all sound effects and word pronunciations in the game.
 
 This module provides a clean interface for playing sounds and handling audio-related functionality, including:
 - Game sound effects (correct answer, wrong answer, etc.)
-- Word pronunciation using text-to-speech
+- Word pronunciation using text-to-speech with local file fallback
 - Celebration sound sequences
 
 ## Implementation
@@ -109,9 +109,29 @@ const AudioService = (function() {
         setupPronunciation: function(word) {
             if (!_pronunciationAudio) return false;
             
-            const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
-            _pronunciationAudio.src = ttsUrl;
-            _pronunciationAudio.load();
+            // Check if we have a local pronunciation file
+            const localPronunciationPath = `assets/sounds/pronunciations/${word.toLowerCase().replace(/\s+/g, '-')}.mp3`;
+            
+            // Try to fetch the local file first
+            fetch(localPronunciationPath, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        // Local pronunciation file exists, use it
+                        _pronunciationAudio.src = localPronunciationPath;
+                    } else {
+                        // Fall back to Google TTS API
+                        const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
+                        _pronunciationAudio.src = ttsUrl;
+                    }
+                    _pronunciationAudio.load();
+                })
+                .catch(() => {
+                    // Error checking for local file, fall back to Google TTS API
+                    const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
+                    _pronunciationAudio.src = ttsUrl;
+                    _pronunciationAudio.load();
+                });
+            
             return true;
         },
         
@@ -152,9 +172,10 @@ const AudioService = (function() {
 ## Key Features
 
 - **Robust error handling**: Graceful handling of audio playback errors
-- **Text-to-speech integration**: API for word pronunciation
+- **Text-to-speech integration**: API for word pronunciation with local file fallback
 - **Sound sequencing**: Timed playback of multiple sounds for celebrations
 - **Centralized audio management**: All audio logic in one module
+- **Offline support**: Local sound files with fallback to online TTS when available
 
 ## HTML Audio Elements
 
@@ -162,13 +183,13 @@ The module relies on audio elements defined in the HTML:
 
 ```html
 <!-- Audio elements -->
-<audio id="correct-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-fairy-arcade-sparkle-866.mp3" preload="auto"></audio>
-<audio id="wrong-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" preload="auto"></audio>
-<audio id="drag-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3" preload="auto"></audio>
-<audio id="hint-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3" preload="auto"></audio>
+<audio id="correct-sound" src="assets/sounds/correct-sound.mp3" preload="auto"></audio>
+<audio id="wrong-sound" src="assets/sounds/wrong-sound.mp3" preload="auto"></audio>
+<audio id="drag-sound" src="assets/sounds/drag-sound.mp3" preload="auto"></audio>
+<audio id="hint-sound" src="assets/sounds/hint-sound.mp3" preload="auto"></audio>
 <audio id="pronunciation" src="" preload="auto"></audio>
-<audio id="clapping-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3" preload="auto"></audio>
-<audio id="whistle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3" preload="auto"></audio>
+<audio id="clapping-sound" src="assets/sounds/clapping-sound.mp3" preload="auto"></audio>
+<audio id="whistle-sound" src="assets/sounds/whistle-sound.mp3" preload="auto"></audio>
 ```
 
 ## Public Methods
@@ -177,23 +198,47 @@ The module relies on audio elements defined in the HTML:
 |--------|-------------|
 | `init()` | Initializes all audio elements and preloads sounds |
 | `playSound(soundType)` | Plays a specific sound effect |
-| `setupPronunciation(word)` | Sets up pronunciation for a word |
+| `setupPronunciation(word)` | Sets up pronunciation for a word with local file fallback |
 | `pronounceWord()` | Plays the current word's pronunciation |
 | `playCelebration()` | Plays a sequence of celebration sounds |
 
 ## Text-to-Speech Implementation
 
-The module uses Google's Text-to-Speech API for word pronunciation:
+The module uses a fallback mechanism for word pronunciation:
+
+1. First, it checks for a local pronunciation file in the `assets/sounds/pronunciations/` directory
+2. If a local file exists, it uses that file for pronunciation
+3. If no local file is found, it falls back to Google's Text-to-Speech API:
 
 ```javascript
 setupPronunciation: function(word) {
     if (!_pronunciationAudio) return false;
     
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(word)}`;
-    _pronunciationAudio.src = ttsUrl;
-    _pronunciationAudio.load();
+    // Check if we have a local pronunciation file
+    const localPronunciationPath = `assets/sounds/pronunciations/${word.toLowerCase().replace(/\s+/g, '-')}.mp3`;
+    
+    // Try to fetch the local file first
+    fetch(localPronunciationPath, { method: 'HEAD' })
+        .then(response => {
+            if (response.ok) {
+                // Local pronunciation file exists, use it
+                _pronunciationAudio.src = localPronunciationPath;
+            } else {
+                // Fall back to Google TTS API
+                const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
+                _pronunciationAudio.src = ttsUrl;
+            }
+            _pronunciationAudio.load();
+        })
+        .catch(() => {
+            // Error checking for local file, fall back to Google TTS API
+            const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
+            _pronunciationAudio.src = ttsUrl;
+            _pronunciationAudio.load();
+        });
+    
     return true;
 }
 ```
 
-This provides auditory feedback to help children learn word pronunciation along with spelling.
+This provides better offline support while still leveraging the online TTS API when available, helping children learn word pronunciation along with spelling.

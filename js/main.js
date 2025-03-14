@@ -4,6 +4,60 @@
  * - Updated to prioritize DatabaseService for data persistence
  * - Maintains backward compatibility with StorageService
  */
+
+// Disable console logging in production
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    console.log = function() {};
+    console.warn = function() {};
+    console.error = function() {};
+}
+
+function hideLoadingOverlay() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('loaded');
+        setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 500);
+    }
+}
+
+// Verify that CDN resources load correctly
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Font Awesome loaded correctly
+    setTimeout(() => {
+        const fontAwesomeTest = document.createElement('i');
+        fontAwesomeTest.className = 'fas fa-check';
+        
+        if (getComputedStyle(fontAwesomeTest).fontFamily.indexOf('Font Awesome') === -1) {
+            // Font Awesome failed to load, add a local fallback or alternative icons
+            console.warn('Font Awesome failed to load, using fallback');
+            
+            // Create a fallback style
+            const fallbackStyle = document.createElement('style');
+            fallbackStyle.textContent = `
+                .fas, .fab, .far { font-family: sans-serif; }
+                .fa-check:before { content: "✓"; }
+                .fa-times:before { content: "✗"; }
+                .fa-lightbulb:before { content: "💡"; }
+                .fa-volume-up:before { content: "🔊"; }
+                .fa-forward:before { content: "⏩"; }
+                .fa-cloud-upload-alt:before { content: "📤"; }
+                .fa-plus:before { content: "+"; }
+                .fa-save:before { content: "💾"; }
+                .fa-wifi:before { content: "📶"; }
+                .fa-share-alt:before { content: "🔗"; }
+                .fa-envelope:before { content: "✉️"; }
+                .fa-sms:before { content: "💬"; }
+                .fa-facebook-messenger:before { content: "📱"; }
+                .fa-telegram:before { content: "📨"; }
+                .fa-sync-alt:before { content: "🔄"; }
+            `;
+            document.head.appendChild(fallbackStyle);
+        }
+    }, 1000);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Word Scramble Game...');
     

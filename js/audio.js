@@ -1,6 +1,6 @@
 /**
  * Audio Module for Word Scramble Game
- * Handles all sound effects and pronunciations
+ * Handles all sound effects and uses Google's Text-to-Speech API for pronunciations
  */
 const AudioService = (function() {
     // Private audio elements
@@ -31,12 +31,25 @@ const AudioService = (function() {
         if (!audio) return;
         
         try {
+            // Reset audio position
             audio.currentTime = 0;
-            audio.play().catch(error => {
-                console.error(`Error playing audio:`, error);
-            });
+            
+            // Play with proper error handling
+            const playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn(`Sound playback error:`, error);
+                    // Don't show this error to the user
+                    
+                    // If we're offline, this might be a network error for remote audio
+                    if (!navigator.onLine && audio.src.startsWith('http')) {
+                        console.info('Device is offline. Unable to play remote audio.');
+                    }
+                });
+            }
         } catch (error) {
-            console.error(`Error with audio playback:`, error);
+            console.warn(`Error with audio playback:`, error);
         }
     }
     
@@ -91,9 +104,21 @@ const AudioService = (function() {
         setupPronunciation: function(word) {
             if (!_pronunciationAudio) return false;
             
-            const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
-            _pronunciationAudio.src = ttsUrl;
+            // Check if we're online
+            const isOnline = navigator.onLine;
+            
+            if (isOnline) {
+                // Use Google TTS API directly for pronunciation
+                console.info(`Using Google TTS API for "${word}"`);
+                const ttsUrl = `${GameConfig.get('apis').textToSpeech}${encodeURIComponent(word)}`;
+                _pronunciationAudio.src = ttsUrl;
+            } else {
+                // We're offline, set empty source
+                console.warn(`Device is offline, cannot use Google TTS API for "${word}"`);
+                _pronunciationAudio.src = '';
+            }
             _pronunciationAudio.load();
+            
             return true;
         },
         

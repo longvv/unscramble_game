@@ -133,12 +133,19 @@ const WordController = (function() {
         if (!wordImageElement) return;
         
         if (imageUrl) {
+            // Add error handling for image loading
+            wordImageElement.onerror = function() {
+                // Fallback to a placeholder image
+                this.src = `https://via.placeholder.com/300x200?text=${encodeURIComponent(word)}`;
+                this.alt = `${word} (placeholder)`;
+                console.log(`Failed to load image for ${word}, using placeholder`);
+            };
+            
             wordImageElement.src = imageUrl;
             wordImageElement.alt = word;
         } else {
-            // Use a placeholder or generated image
-            const placeholderUrl = `https://source.unsplash.com/300x200/?${encodeURIComponent(word)}`;
-            wordImageElement.src = placeholderUrl;
+            // Use a reliable placeholder service
+            wordImageElement.src = `https://via.placeholder.com/300x200?text=${encodeURIComponent(word)}`;
             wordImageElement.alt = word;
         }
     }
@@ -452,7 +459,15 @@ const WordController = (function() {
                 window.EventBus.subscribe('databaseInitialized', () => {
                     console.log('Database initialized, refreshing word data');
                     this.loadNextWord();
+                    hideLoadingOverlay();
                 });
+
+                window.EventBus.subscribe('databaseInitError', () => {
+                    hideLoadingOverlay();
+                });
+                
+                // Also add a timeout as fallback in case events don't fire
+                setTimeout(hideLoadingOverlay, 5000);
             } else {
                 console.warn('EventBus not available, button events will not work');
             }

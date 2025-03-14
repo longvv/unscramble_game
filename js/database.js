@@ -55,67 +55,62 @@ const DatabaseService = (function() {
      * Initialize the database
      * @returns {Promise} Promise that resolves when the database is initialized
      */
-    async function _initDatabase() {
+    function _initDatabase() {
         return new Promise((resolve, reject) => {
-            // Check if IndexedDB is supported
+            // Check IndexedDB support first
             if (!window.indexedDB) {
                 console.error("Your browser doesn't support IndexedDB.");
                 reject(new Error("IndexedDB not supported"));
                 return;
             }
             
-            // Open the database
-            const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-            
-            // Handle database upgrade needed (first time or version change)
-            request.onupgradeneeded = function(event) {
-                const db = event.target.result;
+            try {
+                // Open the database with proper error handling
+                const request = window.indexedDB.open(DB_NAME, DB_VERSION);
                 
-                // Create words object store
-                if (!db.objectStoreNames.contains('words')) {
-                    const wordsStore = db.createObjectStore('words', { keyPath: 'id', autoIncrement: true });
-                    wordsStore.createIndex('word', 'word', { unique: true });
-                    wordsStore.createIndex('active', 'active', { unique: false });
-                    
-                    console.log('Words object store created');
-                }
+                request.onupgradeneeded = function(event) {
+                    const db = event.target.result;
+                    // Create stores with proper error handling
+                    try {
+                        if (!db.objectStoreNames.contains('words')) {
+                            const wordsStore = db.createObjectStore('words', { keyPath: 'id', autoIncrement: true });
+                            wordsStore.createIndex('word', 'word', { unique: true });
+                            wordsStore.createIndex('active', 'active', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('word_images')) {
+                            const imagesStore = db.createObjectStore('word_images', { keyPath: 'word' });
+                            imagesStore.createIndex('word', 'word', { unique: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('game_stats')) {
+                            db.createObjectStore('game_stats', { keyPath: 'key' });
+                        }
+                    } catch (upgradeError) {
+                        console.error('Error during database upgrade:', upgradeError);
+                    }
+                };
                 
-                // Create word_images object store
-                if (!db.objectStoreNames.contains('word_images')) {
-                    const imagesStore = db.createObjectStore('word_images', { keyPath: 'word' });
-                    imagesStore.createIndex('word', 'word', { unique: true });
-                    
-                    console.log('Word images object store created');
-                }
+                request.onsuccess = function(event) {
+                    _db = event.target.result;
+                    console.log('Database opened successfully');
+                    _populateDefaultDataIfNeeded().then(() => {
+                        _isInitialized = true;
+                        resolve();
+                    }).catch(error => {
+                        console.error('Error populating default data:', error);
+                        reject(error);
+                    });
+                };
                 
-                // Create game_stats object store
-                if (!db.objectStoreNames.contains('game_stats')) {
-                    const statsStore = db.createObjectStore('game_stats', { keyPath: 'key' });
-                    
-                    console.log('Game stats object store created');
-                }
-            };
-            
-            // Handle success
-            request.onsuccess = function(event) {
-                _db = event.target.result;
-                console.log('Database opened successfully');
-                
-                // Initialize with default data if needed
-                _populateDefaultDataIfNeeded().then(() => {
-                    _isInitialized = true;
-                    resolve();
-                }).catch(error => {
-                    console.error('Error populating default data:', error);
-                    reject(error);
-                });
-            };
-            
-            // Handle error
-            request.onerror = function(event) {
-                console.error('Database error:', event.target.error);
-                reject(event.target.error);
-            };
+                request.onerror = function(event) {
+                    console.error('Database error:', event.target.error);
+                    reject(event.target.error);
+                };
+            } catch (error) {
+                console.error('Error opening database:', error);
+                reject(error);
+            }
         });
     }
     

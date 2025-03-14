@@ -26,12 +26,12 @@ const urlsToCache = [
   '/js/game-controller.js',
   '/js/main.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css',
-  'https://assets.mixkit.co/sfx/preview/mixkit-fairy-arcade-sparkle-866.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3'
+  '/assets/sounds/correct-sound.mp3',
+  '/assets/sounds/wrong-sound.mp3',
+  '/assets/sounds/drag-sound.mp3',
+  '/assets/sounds/hint-sound.mp3',
+  '/assets/sounds/clapping-sound.mp3',
+  '/assets/sounds/whistle-sound.mp3'
 ];
 
 // Install event - cache all static assets
