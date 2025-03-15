@@ -1,4 +1,4 @@
-// Enhanced Service Worker for Word Scramble Game
+// Enhanced Service Worker for English 4 Kids
 const CACHE_NAME = 'word-scramble-v1';
 
 // Add all essential assets to cache
@@ -68,8 +68,9 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
+  // Skip cross-origin requests except for file:// protocol
   if (!event.request.url.startsWith(self.location.origin) && 
+      !event.request.url.startsWith('file://') &&
       !event.request.url.includes('cdnjs.cloudflare.com') && 
       !event.request.url.includes('mixkit.co')) {
     return;

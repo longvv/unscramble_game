@@ -69,7 +69,9 @@ self.addEventListener('activate', (event) => {
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests except for CDN resources
+  // Also allow file:// protocol requests to access manifest.json
   if (!event.request.url.startsWith(self.location.origin) && 
+      !event.request.url.startsWith('file://') &&
       !event.request.url.includes('cdnjs.cloudflare.com') && 
       !event.request.url.includes('mixkit.co')) {
     return;
