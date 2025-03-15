@@ -1,7 +1,7 @@
 {
-  "name": "word-scramble-game",
+  "name": "english-4-kids",
   "version": "1.0.0",
-  "description": "A fun and interactive word scramble game for children to learn vocabulary",
+  "description": "A fun and interactive word game for children to learn vocabulary",
   "main": "index.html",
   "scripts": {
     "start": "serve -s .",
@@ -29,7 +29,7 @@
     "learning",
     "pwa"
   ],
-  "author": "Word Scramble Game",
+  "author": "English 4 Kids",
   "license": "MIT",
   "devDependencies": {
     "clean-css-cli": "^5.6.2",

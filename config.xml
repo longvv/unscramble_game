@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.wordscramble.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Word Scramble</name>
+    <name>English 4 Kids</name>
     <description>
-        A fun and interactive word scramble game for children to learn English vocabulary through play.
+        A fun and interactive word game for children to learn English vocabulary through play.
     </description>
     <author email="contact@wordscramble.com" href="https://wordscramble.com">
-        Word Scramble Team
+        English 4 Kids Team
     </author>
     <content src="index.html" />
     

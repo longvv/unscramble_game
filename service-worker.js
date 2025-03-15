@@ -1,4 +1,4 @@
-// Enhanced Service Worker for Word Scramble Game
+// Enhanced Service Worker for English 4 Kids
 const CACHE_NAME = 'word-scramble-v1';
 
 // Add all essential assets to cache
@@ -117,8 +117,8 @@ self.addEventListener('fetch', (event) => {
           console.log('[Service Worker] Fetch failed for manifest.json');
           // Return a default response if fetch fails
           return new Response(JSON.stringify({
-            name: 'Word Scramble Game',
-            short_name: 'Word Scramble',
+            name: 'English 4 Kids',
+            short_name: 'English 4 Kids',
             start_url: '/index.html'
           }), {
             headers: {

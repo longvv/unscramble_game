@@ -1,5 +1,5 @@
 /**
- * Main entry point for Word Scramble Game
+ * Main entry point for English 4 Kids
  * Initializes all modules and starts the game
  * - Updated to prioritize DatabaseService for data persistence
  * - Maintains backward compatibility with StorageService
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing Word Scramble Game...');
+    console.log('Initializing English 4 Kids...');
     
     try {
         // Initialize modules in correct order (dependencies first)
@@ -429,14 +429,14 @@ function addShareButton() {
 }
 
 /**
- * Share functionality for Word Scramble Game
+ * Share functionality for English 4 Kids
  * This function handles sharing the game via different methods
  * @param {string} method - The sharing method to use (native, email, sms, facebook, telegram)
  */
 function shareGame(method) {
     // Base share content
-    const gameTitle = "Word Scramble Game";
-    const gameDescription = "Check out this fun educational word scramble game!";
+    const gameTitle = "English 4 Kids";
+    const gameDescription = "Check out this fun educational word game!";
     const gameUrl = window.location.href;
     const shareText = `${gameDescription} Play it here: ${gameUrl}`;
     

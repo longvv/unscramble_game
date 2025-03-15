@@ -1,7 +1,7 @@
 {
-    "name": "Word Scramble Game",
-    "short_name": "Word Scramble",
-    "description": "A fun educational word scramble game for children to learn vocabulary",
+    "name": "English 4 Kids",
+    "short_name": "English 4 Kids",
+    "description": "A fun educational word game for children to learn vocabulary",
     "start_url": "/index.html",
     "display": "standalone",
     "orientation": "portrait",
@@ -63,7 +63,7 @@
       {
         "name": "Start Game",
         "short_name": "Play",
-        "description": "Start playing the Word Scramble Game",
+        "description": "Start playing English 4 Kids",
         "url": "/index.html?action=play",
         "icons": [
           {
