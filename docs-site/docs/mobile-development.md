@@ -2,13 +2,13 @@
 id: mobile-development
 title: Mobile Development Guidelines
 sidebar_label: Mobile Development
-description: Guidelines for developing the Word Scramble Game as a mobile application
+description: Guidelines for developing the English 4 Kids app as a mobile application
 keywords: [mobile, development, PWA, app, guidelines]
 ---
 
 # Mobile Development Guidelines
 
-This document provides comprehensive guidelines for developing, testing, and deploying the Word Scramble Game as a mobile application. Whether you're creating a Progressive Web App (PWA) or building native packages for app stores, these instructions will guide you through the process.
+This document provides comprehensive guidelines for developing, testing, and deploying the English 4 Kids app as a mobile application. Whether you're creating a Progressive Web App (PWA) or building native packages for app stores, these instructions will guide you through the process.
 
 ## Development Environment Setup
 
@@ -30,8 +30,8 @@ This document provides comprehensive guidelines for developing, testing, and dep
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/word-scramble-game.git
-cd word-scramble-game
+git clone https://github.com/your-org/english-4-kids.git
+cd english-4-kids
 
 # Install dependencies
 npm install
@@ -45,7 +45,7 @@ npm install -g serve
 The project follows this structure for optimal organization:
 
 ```
-word-scramble-game/
+english-4-kids/
 ├── index.html           # Main HTML file
 ├── offline.html         # Offline fallback page
 ├── style.css            # Main styles
@@ -129,7 +129,7 @@ Capacitor is the modern way to create native apps from web apps.
 
 1. **Initialize Capacitor**
    ```bash
-   npx cap init "Word Scramble" com.wordscramble.app
+   npx cap init "English 4 Kids" com.wordscramble.app
    ```
 
 2. **Build web assets**

@@ -10,9 +10,10 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Word Scramble Game',
+  title: 'English 4 Kids',
   tagline: 'A fun educational game for children',
   favicon: 'img/favicon.ico',
+
 
   // Set the production url of your site here
   url: 'https://your-docusaurus-site.example.com',
@@ -23,7 +24,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'your-github-org', // Usually your GitHub org/user name.
-  projectName: 'word-scramble-game', // Usually your repo name.
+  projectName: 'english-4-kids', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -67,9 +68,9 @@ const config = {
       // Replace with your project's social card
       image: 'img/word-scramble-social-card.jpg',
       navbar: {
-        title: 'Word Scramble Game',
+        title: 'English 4 Kids',
         logo: {
-          alt: 'Word Scramble Game Logo',
+          alt: 'English 4 Kids Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -116,7 +117,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Word Scramble Game. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} English 4 Kids. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

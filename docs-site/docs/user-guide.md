@@ -4,15 +4,15 @@ title: User Guide
 sidebar_position: 8
 ---
 
-# Word Scramble Game: User Guide
+# English 4 Kids: User Guide
 
-Welcome to the Word Scramble Game! This educational game helps children learn English vocabulary through an interactive and fun experience. This guide will walk you through all aspects of the game.
+Welcome to English 4 Kids! This educational game helps children learn English vocabulary through an interactive and fun experience. This guide will walk you through all aspects of the game.
 
 ## Getting Started
 
 ### Game Interface
 
-![Game Interface](https://via.placeholder.com/800x500/f9f7f7/333333?text=Word+Scramble+Game+Interface)
+![Game Interface](https://via.placeholder.com/800x500/f9f7f7/333333?text=English+4+Kids+Interface)
 
 The game interface consists of several key areas:
 

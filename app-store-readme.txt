@@ -1,6 +1,6 @@
-# Word Scramble Game: App Store Publishing Guide
+# English 4 Kids: App Store Publishing Guide
 
-This document outlines the steps to package and publish the Word Scramble Game to both the Apple App Store and Google Play Store.
+This document outlines the steps to package and publish the English 4 Kids app to both the Apple App Store and Google Play Store.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ Capacitor is the modern way to create cross-platform apps from web apps.
 
    ```bash
    npm install
-   npx cap init "Word Scramble" com.wordscramble.app
+   npx cap init "English 4 Kids" com.wordscramble.app
    ```
 
 2. **Build the web app**:

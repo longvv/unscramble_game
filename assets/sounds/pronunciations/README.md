@@ -1,6 +1,6 @@
 # Word Pronunciation Files
 
-This directory contains MP3 files for word pronunciations used in the Word Scramble Game.
+This directory contains MP3 files for word pronunciations used in the English 4 Kids app.
 
 ## Adding Pronunciation Files
 

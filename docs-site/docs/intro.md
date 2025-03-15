@@ -1,11 +1,11 @@
 ---
 id: intro
-title: Introduction to the Word Scramble Game
+title: Introduction to English 4 Kids
 sidebar_position: 1
 slug: /
 ---
 
-# Word Scramble Game
+# English 4 Kids
 
 A fun and interactive word scramble game designed to help children learn English vocabulary through play. Features images and sound to create a multi-sensory learning experience.
 

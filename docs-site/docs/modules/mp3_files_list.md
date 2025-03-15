@@ -1,4 +1,4 @@
-# MP3 Files Used in Word Scramble Game
+# MP3 Files Used in English 4 Kids
 
 This document lists all MP3 files used in the application. All files have been downloaded and stored locally in the `/assets/sounds/` directory.
 

@@ -2,13 +2,13 @@
 id: deployment-guide
 title: Deployment Guide
 sidebar_label: Deployment Guide
-description: Step-by-step guide for deploying the Word Scramble Game to your domain
+description: Step-by-step guide for deploying the English 4 Kids app to your domain
 keywords: [deployment, hosting, domain, web server, HTTPS, DNS]
 ---
 
 # Deployment Guide
 
-This guide provides detailed instructions for deploying the Word Scramble Game to your custom domain. It covers the entire process from preparing your codebase to configuring your domain and web server.
+This guide provides detailed instructions for deploying the English 4 Kids app to your custom domain. It covers the entire process from preparing your codebase to configuring your domain and web server.
 
 ## 1. Preparing Your Codebase for Production
 
@@ -18,7 +18,7 @@ Before deploying, you need to create an optimized production build:
 
 ```bash
 # Navigate to your project directory
-cd /path/to/word-scramble-game
+cd /path/to/english-4-kids
 
 # Install dependencies if you haven't already
 npm install

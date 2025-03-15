@@ -1,5 +1,5 @@
 // Enhanced Service Worker for English 4 Kids
-const CACHE_NAME = 'word-scramble-v1';
+const CACHE_NAME = 'english-4-kids-v1';
 
 // Add all essential assets to cache
 const urlsToCache = [

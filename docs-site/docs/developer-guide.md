@@ -6,7 +6,7 @@ sidebar_position: 9
 
 # Developer Guide
 
-This developer guide provides instructions for developers who want to extend or modify the Word Scramble Game.
+This developer guide provides instructions for developers who want to extend or modify the English 4 Kids app.
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ This developer guide provides instructions for developers who want to extend or 
 ## Project Structure
 
 ```
-word-scramble-game/
+english-4-kids/
 ├── index.html          # Main HTML file
 ├── style.css           # Styles for the game
 ├── manifest.json       # Progressive Web App manifest
@@ -547,6 +547,6 @@ const _config = {
 
 ## Conclusion
 
-This developer guide provides a comprehensive overview of the Word Scramble Game architecture and how to extend it. By following the patterns and practices outlined here, you can add new features and functionality while maintaining the game's modular structure and code quality.
+This developer guide provides a comprehensive overview of the English 4 Kids architecture and how to extend it. By following the patterns and practices outlined here, you can add new features and functionality while maintaining the game's modular structure and code quality.
 
 For more detailed information about specific modules, refer to the module documentation in the "Modules" section.
